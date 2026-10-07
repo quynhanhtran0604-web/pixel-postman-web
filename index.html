@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Bưu Điện Sài Gòn - Retro Pixel File Converter & Compressor</title>
   
   <!-- Retro Fonts: Press Start 2P & Chakra Petch (Pixel Arcade with full Vietnamese Unicode support) -->
@@ -49,6 +49,9 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
+      overflow-x: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
       background-color: #0b0c10;
       font-family: var(--pixel-font-vn);
       color: var(--color-dark);
@@ -80,11 +83,10 @@
 
     /* Scene Stage matches background geometry for Postman & Post Office sparkles */
     #scene-stage {
-      position: fixed;
+      position: absolute;
       inset: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 10;
       pointer-events: none !important;
       overflow: visible;
     }
@@ -650,54 +652,41 @@
     #postman-entity {
       position: absolute;
       left: 26.2%;
-      top: 43.8%;
-      width: 9.8%;
-      height: 36.8%;
-      z-index: 35;
-      transform-origin: bottom center;
+      bottom: calc(19% - 19px);
+      width: auto !important;
+      height: auto !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
       pointer-events: none !important;
-    }
-
-    #postman-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      image-rendering: pixelated;
-      display: block;
-      z-index: 2;
+      display: inline-flex;
+      align-items: flex-end;
+      justify-content: center;
+      transform-origin: bottom center;
     }
 
     #postman-video {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      mix-blend-mode: screen;
-      filter: contrast(1.1) brightness(1.05);
+      display: block !important;
+      height: 125px !important;
+      width: auto !important;
+      object-fit: contain !important;
+      background: transparent !important;
       image-rendering: pixelated;
-      display: none;
-      z-index: 1;
-    }
-
-    .postman-shadow {
-      position: absolute;
-      bottom: 2%;
-      left: 22%;
-      width: 56%;
-      height: 8%;
-      background: rgba(30, 25, 45, 0.45);
-      border-radius: 50%;
-      z-index: 0;
-      filter: blur(1px);
+      image-rendering: crisp-edges;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      pointer-events: none !important;
+      filter: url(#luma-key);
     }
 
     .postman-parcel {
       position: absolute;
-      top: 52%;
-      left: 12%;
+      top: 38%;
+      left: 44%;
       font-size: 20px;
       z-index: 5;
       display: none;
@@ -1003,16 +992,416 @@
       pointer-events: none !important;
     }
 
-    #retro-toast.show {
-      transform: translateX(-50%) translateY(0);
+    .dropdown-close-btn {
+      background: var(--color-red-post);
+      color: #fff;
+      border: 2px solid #000;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--pixel-font-latin);
+      font-size: 11px;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      box-shadow: 1px 1px 0 #000;
+    }
+
+    .dropdown-close-btn:hover {
+      background: #ff4d4d;
+    }
+
+    /* ==========================================================================
+       MOBILE-FIRST RESPONSIVE STYLES (MAX-WIDTH: 768PX)
+       ========================================================================== */
+    @media (max-width: 768px) {
+      /* Safe area and anti-overflow adjustments */
+      html, body {
+        overflow-x: hidden;
+      }
+
+      /* Floating Bottom Control Dock */
+      .fixed-actions-container {
+        top: auto !important;
+        bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+        left: 10px !important;
+        right: 10px !important;
+        width: auto !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 10px !important;
+        z-index: 99999 !important;
+      }
+
+      .retro-btn-wrapper {
+        flex: 1 !important;
+        max-width: 200px !important;
+        display: flex !important;
+      }
+
+      .retro-action-btn {
+        width: 100% !important;
+        height: 52px !important;
+        min-height: 48px !important;
+        padding: 0 10px !important;
+        gap: 8px !important;
+        justify-content: center !important;
+        border-width: 3px !important;
+        box-shadow: 3px 3px 0 #000 !important;
+      }
+
+      .retro-action-btn:active {
+        transform: translate(2px, 2px) !important;
+        box-shadow: 1px 1px 0 #000 !important;
+      }
+
+      .btn-icon-box {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 18px !important;
+        border-width: 2px !important;
+      }
+
+      .btn-content-box {
+        gap: 1px !important;
+      }
+
+      .btn-primary-title {
+        font-size: 10px !important;
+        line-height: 1.1 !important;
+        letter-spacing: -0.5px !important;
+      }
+
+      .btn-secondary-desc {
+        font-size: 11px !important;
+        line-height: 1.1 !important;
+      }
+
+      .btn-arrow-indicator {
+        display: none !important;
+      }
+
+      /* Clean Retro Pixel Bottom-Sheet Dropdown */
+      .retro-dropdown-menu {
+        position: fixed !important;
+        left: 50% !important;
+        bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
+        top: auto !important;
+        transform: translateX(-50%) !important;
+        width: calc(100vw - 20px) !important;
+        max-width: 390px !important;
+        max-height: 65vh !important;
+        border: 3px solid #000 !important;
+        box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.65), 5px 5px 0 #000 !important;
+        animation: mobileSheetSlide 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) !important;
+        z-index: 100000 !important;
+      }
+
+      .retro-dropdown-menu::before {
+        display: none !important;
+      }
+
+      .retro-btn-wrapper.menu-open .retro-dropdown-menu {
+        display: flex !important;
+      }
+
+      @keyframes mobileSheetSlide {
+        0% { opacity: 0; transform: translate(-50%, 16px); }
+        100% { opacity: 1; transform: translate(-50%, 0); }
+      }
+
+      .dropdown-header {
+        padding: 10px 14px !important;
+        font-size: 13px !important;
+      }
+
+      .dropdown-body {
+        padding: 8px !important;
+        gap: 6px !important;
+        max-height: calc(65vh - 44px) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      .dropdown-item-btn {
+        min-height: 48px !important;
+        padding: 10px 12px !important;
+        gap: 10px !important;
+      }
+
+      .d-icon {
+        font-size: 20px !important;
+      }
+
+      .d-title {
+        font-size: 14px !important;
+      }
+
+      .d-desc {
+        font-size: 11px !important;
+      }
+
+      /* Compact Top HUD Bar */
+      .hud-bar {
+        top: calc(8px + env(safe-area-inset-top, 0px)) !important;
+        left: 8px !important;
+        right: 8px !important;
+      }
+
+      .hud-title-badge {
+        padding: 4px 8px !important;
+        gap: 6px !important;
+      }
+
+      .hud-title-text {
+        font-size: 10px !important;
+      }
+
+      .pixel-icon-btn {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 16px !important;
+      }
+
+      /* Edge-to-Edge Drag & Drop Modal */
+      #upload-modal {
+        padding: 10px !important;
+      }
+
+      .upload-card {
+        width: 92vw !important;
+        max-width: 380px !important;
+        border-width: 3px !important;
+        box-shadow: 6px 6px 0 #000 !important;
+      }
+
+      .upload-card-header {
+        padding: 10px 14px !important;
+      }
+
+      .upload-card-header h2 {
+        font-size: 15px !important;
+      }
+
+      .upload-card-body {
+        padding: 14px !important;
+        gap: 12px !important;
+      }
+
+      .selected-mode-pill {
+        font-size: 13px !important;
+        padding: 6px 10px !important;
+      }
+
+      .dropzone-box {
+        padding: 24px 12px !important;
+        min-height: 130px !important;
+      }
+
+      .dropzone-icon {
+        font-size: 38px !important;
+        margin-bottom: 6px !important;
+      }
+
+      .dropzone-main-text {
+        font-size: 14px !important;
+      }
+
+      .dropzone-sub-text {
+        font-size: 12px !important;
+      }
+
+      .start-deliver-btn {
+        font-size: 14px !important;
+        padding: 12px 14px !important;
+        min-height: 48px !important;
+      }
+
+      /* Proportional Mobile Postman Character Scaling */
+      #postman-entity {
+        width: auto !important;
+        height: auto !important;
+        max-height: none !important;
+        top: auto !important;
+        bottom: calc(19% - 19px) !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      #postman-video {
+        height: 120px !important;
+        width: auto !important;
+        object-fit: contain !important;
+        background: transparent !important;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        filter: url(#luma-key);
+      }
+
+      /* Mobile Post Office Sparkles & Status Badge */
+      #office-status-badge {
+        right: 50% !important;
+        transform: translateX(50%) !important;
+        top: 22% !important;
+        width: 90vw !important;
+        max-width: 340px !important;
+        min-width: auto !important;
+        padding: 10px 14px !important;
+        border-width: 3px !important;
+      }
+
+      /* Mobile Delivery Result & Download Popup */
+      #delivery-bubble {
+        position: fixed !important;
+        left: 50% !important;
+        top: 46% !important;
+        bottom: auto !important;
+        transform: translate(-50%, -50%) !important;
+        width: 92vw !important;
+        max-width: 360px !important;
+        padding: 14px 16px !important;
+        border-width: 3px !important;
+        box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.65), 6px 6px 0 #000 !important;
+        gap: 10px !important;
+        z-index: 100000 !important;
+      }
+
+      #delivery-bubble::before,
+      #delivery-bubble::after {
+        display: none !important;
+      }
+
+      .bubble-title {
+        font-size: 14px !important;
+      }
+
+      .bubble-details {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+      }
+
+      .download-action-btn {
+        font-size: 14px !important;
+        padding: 12px !important;
+        min-height: 48px !important;
+      }
+
+      .reset-action-btn {
+        font-size: 13px !important;
+        padding: 10px !important;
+        min-height: 44px !important;
+      }
+
+      #retro-toast {
+        bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+        font-size: 12px !important;
+        padding: 6px 14px !important;
+        max-width: 90vw !important;
+        text-align: center !important;
+      }
     }
   </style>
 </head>
 <body>
 
+  <!-- Hardware-accelerated Luma Key Filter for pure black background removal -->
+  <svg style="position: absolute; width: 0; height: 0; pointer-events: none;" aria-hidden="true">
+    <filter id="luma-key" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                4 4 4 0 -0.4" />
+    </filter>
+  </svg>
+
   <!-- Full-viewport fixed background container -->
   <div id="bg-container">
     <img id="bg-img" src="assets/background.jpg" alt="Saigon Central Post Office Retro Background" />
+
+    <!-- Main Scene Stage (Postman & Post Office Entities) -->
+    <div id="scene-stage">
+      
+      <!-- Post Office Windows Sparkles & Glow -->
+      <div id="windows-sparkles">
+        <div class="window-glow" style="left: 54%; top: 38%; width: 5%; height: 8%;"></div>
+        <div class="window-glow" style="left: 60%; top: 38%; width: 5%; height: 8%;"></div>
+        <div class="window-glow" style="left: 66%; top: 38%; width: 5%; height: 8%;"></div>
+        <div class="window-glow" style="left: 72%; top: 38%; width: 5%; height: 8%;"></div>
+        <div class="window-glow" style="left: 78%; top: 38%; width: 5%; height: 8%;"></div>
+        
+        <div class="pixel-sparkle" style="left: 55%; top: 39%; animation-delay: 0.1s;"></div>
+        <div class="pixel-sparkle" style="left: 62%; top: 41%; animation-delay: 0.4s;"></div>
+        <div class="pixel-sparkle" style="left: 68%; top: 37%; animation-delay: 0.2s;"></div>
+        <div class="pixel-sparkle" style="left: 74%; top: 40%; animation-delay: 0.6s;"></div>
+        <div class="pixel-sparkle" style="left: 80%; top: 38%; animation-delay: 0.3s;"></div>
+        <div class="pixel-sparkle" style="left: 92%; top: 33%; animation-delay: 0.5s;"></div>
+      </div>
+
+      <!-- Post Office Processing Status Badge -->
+      <div id="office-status-badge">
+        <div class="badge-header">
+          <span class="badge-spinner">📮</span>
+          <span id="badge-title">ĐANG XỬ LÝ / DELIVERING & CONVERTING...</span>
+        </div>
+        <div class="retro-progress-track">
+          <div id="badge-progress-fill" class="retro-progress-fill"></div>
+        </div>
+        <div id="badge-subtext" class="badge-subtext">Bưu tá đang làm việc bên trong Bưu điện Sài Gòn...</div>
+      </div>
+
+      <!-- Postman Character Entity -->
+      <div id="postman-entity">
+        <video id="postman-video" src="assets/postman-walk.mp4" autoplay playsinline muted loop></video>
+        <!-- Mail package badge -->
+        <div id="postman-parcel" class="postman-parcel">✉️</div>
+      </div>
+
+      <!-- Cheerful Delivery Speech Bubble & Download Action -->
+      <div id="delivery-bubble">
+        <div class="bubble-title">
+          <span>📬</span>
+          <span>BƯU TÁ SÀI GÒN:</span>
+        </div>
+        <div style="font-family: var(--pixel-font-vn); font-size: 16px; font-weight: 700; color: #000; line-height: 1.4;">
+          "Bưu kiện của bạn đã xử lý xong!"
+        </div>
+        <div class="bubble-details">
+          <div class="detail-row">
+            <span>Tệp xuất:</span>
+            <span id="bubble-file-name" class="detail-val">result.png</span>
+          </div>
+          <div class="detail-row">
+            <span>Dung lượng gốc:</span>
+            <span id="bubble-orig-size">1.2 MB</span>
+          </div>
+          <div class="detail-row">
+            <span>Dung lượng mới:</span>
+            <span id="bubble-new-size" class="detail-val">450 KB</span>
+          </div>
+          <div class="detail-row" id="bubble-saved-row">
+            <span>Tiết kiệm:</span>
+            <span id="bubble-saved-pct" class="detail-val">-62.5%</span>
+          </div>
+        </div>
+        <button id="btn-download-result" class="download-action-btn" type="button">
+          💾 TẢI VỀ NGAY (DOWNLOAD)
+        </button>
+        <button id="btn-reset-journey" class="reset-action-btn" type="button">
+          🔄 Chuyển Đổi Tệp Khác
+        </button>
+      </div>
+
+    </div> <!-- End scene-stage -->
   </div>
 
   <!-- HUD Top Bar -->
@@ -1050,7 +1439,8 @@
       <!-- Sleek Pixel Dropdown Menu for Convert file -->
       <div class="retro-dropdown-menu" id="dropdown-convert">
         <div class="dropdown-header">
-          <span>⚡ CHỌN ĐỊNH DẠNG CHUYỂN ĐỔI</span>
+          <span>⚡ CHỌN ĐỊNH DẠNG</span>
+          <button type="button" class="dropdown-close-btn" data-close="wrapper-convert" title="Đóng">&times;</button>
         </div>
         <div class="dropdown-body">
           <button class="dropdown-item-btn" data-mode="pdf_to_png" data-name="PDF to PNG" data-accept=".pdf">
@@ -1106,7 +1496,8 @@
       <!-- Sleek Pixel Dropdown Menu for Compress file -->
       <div class="retro-dropdown-menu" id="dropdown-compress">
         <div class="dropdown-header">
-          <span>🗜️ CHỌN TÙY CHỌN NÉN TỆP</span>
+          <span>🗜️ TÙY CHỌN NÉN</span>
+          <button type="button" class="dropdown-close-btn" data-close="wrapper-compress" title="Đóng">&times;</button>
         </div>
         <div class="dropdown-body">
           <button class="dropdown-item-btn" data-mode="compress_image" data-name="Nén ảnh (PNG / JPEG)" data-accept=".jpg,.jpeg,.png,.webp">
@@ -1139,84 +1530,7 @@
   <!-- Confetti Canvas -->
   <canvas id="confetti-canvas"></canvas>
 
-  <!-- Main Scene Stage (Postman & Post Office Entities) -->
-  <div id="scene-stage">
-    
-    <!-- Post Office Windows Sparkles & Glow -->
-    <div id="windows-sparkles">
-      <div class="window-glow" style="left: 54%; top: 38%; width: 5%; height: 8%;"></div>
-      <div class="window-glow" style="left: 60%; top: 38%; width: 5%; height: 8%;"></div>
-      <div class="window-glow" style="left: 66%; top: 38%; width: 5%; height: 8%;"></div>
-      <div class="window-glow" style="left: 72%; top: 38%; width: 5%; height: 8%;"></div>
-      <div class="window-glow" style="left: 78%; top: 38%; width: 5%; height: 8%;"></div>
-      
-      <div class="pixel-sparkle" style="left: 55%; top: 39%; animation-delay: 0.1s;"></div>
-      <div class="pixel-sparkle" style="left: 62%; top: 41%; animation-delay: 0.4s;"></div>
-      <div class="pixel-sparkle" style="left: 68%; top: 37%; animation-delay: 0.2s;"></div>
-      <div class="pixel-sparkle" style="left: 74%; top: 40%; animation-delay: 0.6s;"></div>
-      <div class="pixel-sparkle" style="left: 80%; top: 38%; animation-delay: 0.3s;"></div>
-      <div class="pixel-sparkle" style="left: 92%; top: 33%; animation-delay: 0.5s;"></div>
-    </div>
 
-    <!-- Post Office Processing Status Badge -->
-    <div id="office-status-badge">
-      <div class="badge-header">
-        <span class="badge-spinner">📮</span>
-        <span id="badge-title">ĐANG XỬ LÝ / DELIVERING & CONVERTING...</span>
-      </div>
-      <div class="retro-progress-track">
-        <div id="badge-progress-fill" class="retro-progress-fill"></div>
-      </div>
-      <div id="badge-subtext" class="badge-subtext">Bưu tá đang làm việc bên trong Bưu điện Sài Gòn...</div>
-    </div>
-
-    <!-- Postman Character Entity -->
-    <div id="postman-entity">
-      <div class="postman-shadow"></div>
-      <!-- Canvas for real-time Luma keying -->
-      <canvas id="postman-canvas"></canvas>
-      <!-- Fallback native video -->
-      <video id="postman-video" src="assets/postman-walk.mp4" playsinline muted loop crossOrigin="anonymous"></video>
-      <!-- Mail package badge -->
-      <div id="postman-parcel" class="postman-parcel">✉️</div>
-    </div>
-
-    <!-- Cheerful Delivery Speech Bubble & Download Action -->
-    <div id="delivery-bubble">
-      <div class="bubble-title">
-        <span>📬</span>
-        <span>BƯU TÁ SÀI GÒN:</span>
-      </div>
-      <div style="font-family: var(--pixel-font-vn); font-size: 16px; font-weight: 700; color: #000; line-height: 1.4;">
-        "Bưu kiện của bạn đã xử lý xong!"
-      </div>
-      <div class="bubble-details">
-        <div class="detail-row">
-          <span>Tệp xuất:</span>
-          <span id="bubble-file-name" class="detail-val">result.png</span>
-        </div>
-        <div class="detail-row">
-          <span>Dung lượng gốc:</span>
-          <span id="bubble-orig-size">1.2 MB</span>
-        </div>
-        <div class="detail-row">
-          <span>Dung lượng mới:</span>
-          <span id="bubble-new-size" class="detail-val">450 KB</span>
-        </div>
-        <div class="detail-row" id="bubble-saved-row">
-          <span>Tiết kiệm:</span>
-          <span id="bubble-saved-pct" class="detail-val">-62.5%</span>
-        </div>
-      </div>
-      <button id="btn-download-result" class="download-action-btn" type="button">
-        💾 TẢI VỀ NGAY (DOWNLOAD)
-      </button>
-      <button id="btn-reset-journey" class="reset-action-btn" type="button">
-        🔄 Chuyển Đổi Tệp Khác
-      </button>
-    </div>
-
-  </div> <!-- End scene-stage -->
 
   <!-- ==========================================================================
        CENTERED DRAG & DROP UPLOAD ZONE MODAL
@@ -1396,12 +1710,41 @@
       const BG_ASPECT = BG_WIDTH / BG_HEIGHT; // ~1.7916667
 
       const stage = document.getElementById('scene-stage');
+      const postmanEntity = document.getElementById('postman-entity');
+      let isDelivering = false;
+
+      function isMobileViewport() {
+        return window.innerWidth <= 768;
+      }
+
+      function getStartX() {
+        return isMobileViewport() ? 10.0 : 26.2;
+      }
+
+      function getDoorX() {
+        return isMobileViewport() ? 84.0 : 89.0;
+      }
+
+      function getReturnX() {
+        return isMobileViewport() ? 46.0 : 48.0;
+      }
 
       function updateStageGeometry() {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const vAspect = vw / vh;
 
+        if (vw <= 768) {
+          stage.style.width = '100vw';
+          stage.style.height = '100vh';
+          stage.style.left = '0px';
+          stage.style.top = '0px';
+          if (!isDelivering) {
+            postmanEntity.style.left = getStartX() + '%';
+          }
+          return;
+        }
+
+        const vAspect = vw / vh;
         let stageW, stageH, stageLeft, stageTop;
 
         if (vAspect > BG_ASPECT) {
@@ -1420,6 +1763,10 @@
         stage.style.height = stageH + 'px';
         stage.style.left = stageLeft + 'px';
         stage.style.top = stageTop + 'px';
+
+        if (!isDelivering) {
+          postmanEntity.style.left = getStartX() + '%';
+        }
       }
 
       window.addEventListener('resize', updateStageGeometry);
@@ -1444,8 +1791,8 @@
       function firePixelConfetti() {
         confettiParticles = [];
         const colors = ['#f7d046', '#d62828', '#2ecc71', '#3498db', '#9b59b6', '#ffffff'];
-        const centerX = window.innerWidth * 0.5;
-        const centerY = window.innerHeight * 0.65;
+        const centerX = window.innerWidth * (getReturnX() / 100);
+        const centerY = isMobileViewport() ? window.innerHeight * 0.72 : window.innerHeight * 0.65;
 
         for (let i = 0; i < 90; i++) {
           const angle = Math.random() * Math.PI * 2;
@@ -1495,19 +1842,8 @@
       /* ------------------------------------------------------------------------
          4. POSTMAN CHARACTER VIDEO & CANVAS LUMA KEYING
          ------------------------------------------------------------------------ */
-      const postmanEntity = document.getElementById('postman-entity');
       const postmanVideo = document.getElementById('postman-video');
-      const postmanCanvas = document.getElementById('postman-canvas');
       const postmanParcel = document.getElementById('postman-parcel');
-      let canvasCtx = null;
-      let isCanvasKeyingActive = true;
-      let cropBounds = null;
-
-      try {
-        canvasCtx = postmanCanvas.getContext('2d', { willReadFrequently: true });
-      } catch (e) {
-        isCanvasKeyingActive = false;
-      }
 
       postmanVideo.muted = true;
       postmanVideo.loop = true;
@@ -1516,78 +1852,6 @@
       if (playPromise !== undefined) {
         playPromise.catch(() => {});
       }
-
-      function detectSpriteBounds(frameData, w, h) {
-        let minX = w, maxX = 0, minY = h, maxY = 0;
-        let found = false;
-        const d = frameData.data;
-        for (let y = 0; y < h; y += 4) {
-          for (let x = 0; x < w; x += 4) {
-            const idx = (y * w + x) * 4;
-            if (d[idx] > 25 || d[idx + 1] > 25 || d[idx + 2] > 25) {
-              if (x < minX) minX = x;
-              if (x > maxX) maxX = x;
-              if (y < minY) minY = y;
-              if (y > maxY) maxY = y;
-              found = true;
-            }
-          }
-        }
-        if (found && maxX > minX && maxY > minY) {
-          const pad = 16;
-          return {
-            x: Math.max(0, minX - pad),
-            y: Math.max(0, minY - pad),
-            w: Math.min(w, (maxX - minX) + pad * 2),
-            h: Math.min(h, (maxY - minY) + pad * 2)
-          };
-        }
-        return { x: 0, y: 0, w, h };
-      }
-
-      function renderPostmanLoop() {
-        if (isCanvasKeyingActive && postmanVideo.readyState >= 2) {
-          try {
-            const vw = postmanVideo.videoWidth || 1920;
-            const vh = postmanVideo.videoHeight || 1080;
-
-            if (!cropBounds) {
-              postmanCanvas.width = vw;
-              postmanCanvas.height = vh;
-              canvasCtx.drawImage(postmanVideo, 0, 0, vw, vh);
-              const testFrame = canvasCtx.getImageData(0, 0, vw, vh);
-              cropBounds = detectSpriteBounds(testFrame, vw, vh);
-              postmanCanvas.width = cropBounds.w;
-              postmanCanvas.height = cropBounds.h;
-            }
-
-            canvasCtx.clearRect(0, 0, cropBounds.w, cropBounds.h);
-            canvasCtx.drawImage(
-              postmanVideo,
-              cropBounds.x, cropBounds.y, cropBounds.w, cropBounds.h,
-              0, 0, cropBounds.w, cropBounds.h
-            );
-
-            const imgData = canvasCtx.getImageData(0, 0, cropBounds.w, cropBounds.h);
-            const d = imgData.data;
-            const len = d.length;
-            for (let i = 0; i < len; i += 4) {
-              const r = d[i], g = d[i + 1], b = d[i + 2];
-              if (r < 24 && g < 24 && b < 24) {
-                d[i + 3] = 0;
-              }
-            }
-            canvasCtx.putImageData(imgData, 0, 0);
-
-          } catch (corsErr) {
-            isCanvasKeyingActive = false;
-            postmanCanvas.style.display = 'none';
-            postmanVideo.style.display = 'block';
-          }
-        }
-        requestAnimationFrame(renderPostmanLoop);
-      }
-      requestAnimationFrame(renderPostmanLoop);
 
       /* ------------------------------------------------------------------------
          5. FIXED RETRO BUTTONS & POPOVER MENUS CONTROLLER
@@ -1640,7 +1904,6 @@
       let selectedFile = null;
       let processedBlob = null;
       let processedFileName = '';
-      let isDelivering = false;
 
       let toastTimer = null;
       function showToast(msg) {
@@ -1689,11 +1952,19 @@
         }
       });
 
-      // Outside click closes popovers
+      // Outside click / touch closes popovers
       document.addEventListener('click', (e) => {
         if (!wrapperConvert.contains(e.target) && !wrapperCompress.contains(e.target)) {
           closeAllPopovers();
         }
+      });
+
+      document.querySelectorAll('.dropdown-close-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          audio.click();
+          closeAllPopovers();
+        });
       });
 
       // Sound toggle & Info
@@ -1832,10 +2103,6 @@
       /* ------------------------------------------------------------------------
          6. THE DELIVERY JOURNEY ANIMATION (FILE PROCESSING SEQUENCE)
          ------------------------------------------------------------------------ */
-      const START_X = 26.2; // Sidewalk initial position (%)
-      const DOOR_X = 89.0;  // Saigon Central Post Office entrance doors (%)
-      const RETURN_X = 48.0;// Sidewalk center celebration spot (%)
-
       let walkSoundInterval = null;
 
       function startFootstepAudio() {
@@ -1871,7 +2138,7 @@
         startFootstepAudio();
 
         requestAnimationFrame(() => {
-          postmanEntity.style.left = DOOR_X + '%';
+          postmanEntity.style.left = getDoorX() + '%';
         });
 
         // Vanish into doorway as he reaches entrance
@@ -1939,7 +2206,7 @@
         processedFileName = result.name;
 
         postmanEntity.style.transition = 'none';
-        postmanEntity.style.left = DOOR_X + '%';
+        postmanEntity.style.left = getDoorX() + '%';
         postmanEntity.style.opacity = '1';
         postmanParcel.style.display = 'block';
         postmanParcel.textContent = '🎁';
@@ -1952,7 +2219,7 @@
 
         setTimeout(() => {
           postmanEntity.style.transition = 'left 2.2s linear';
-          postmanEntity.style.left = RETURN_X + '%';
+          postmanEntity.style.left = getReturnX() + '%';
         }, 50);
 
         setTimeout(() => {
@@ -2023,7 +2290,7 @@
         postmanParcel.style.display = 'none';
         postmanEntity.style.transition = 'left 1s ease-in-out';
         postmanEntity.style.transform = 'scaleX(1)';
-        postmanEntity.style.left = START_X + '%';
+        postmanEntity.style.left = getStartX() + '%';
         postmanEntity.style.opacity = '1';
 
         isDelivering = false;
@@ -2304,7 +2571,7 @@
           officeStatusBadge.style.display = 'flex';
           badgeProgressFill.style.width = '65%';
         } else if (testState === 'delivered') {
-          postmanEntity.style.left = RETURN_X + '%';
+          postmanEntity.style.left = getReturnX() + '%';
           firePixelConfetti();
           showDeliveryBubble({
             name: 'tai_lieu_2026.png',
@@ -2314,6 +2581,7 @@
         }
       }
 
+      window.applyTestState = applyTestState;
       applyTestState();
       window.addEventListener('load', applyTestState);
 
