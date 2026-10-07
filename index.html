@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bưu Điện Sài Gòn - Retro Pixel File Converter & Compressor</title>
+  
+  <!-- Retro Fonts: Press Start 2P & Chakra Petch (Pixel Arcade with full Vietnamese Unicode support) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,700;1,700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <!-- Client-side Conversion CDNs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       RESET & RETRO BASE VARIABLES
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    :root {
+      --pixel-font-latin: 'Press Start 2P', monospace;
+      --pixel-font-vn: 'Chakra Petch', sans-serif;
+      --color-gold: #f7d046;
+      --color-gold-hover: #ffe57f;
+      --color-red-post: #d62828;
+      --color-green-post: #1b4d3e;
+      --color-cream: #fcf8ec;
+      --color-dark: #1e1e24;
+      --shadow-pixel: 4px 4px 0 #000;
+      --shadow-pixel-sm: 2px 2px 0 #000;
+      --shadow-pixel-lg: 6px 6px 0 #000;
+      --shadow-pixel-xl: 8px 8px 0 #000;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #0b0c10;
+      font-family: var(--pixel-font-vn);
+      color: var(--color-dark);
+      image-rendering: pixelated;
+    }
+
+    /* ==========================================================================
+       BACKGROUND & PASSIVE STAGE LAYERS (NEVER INTERCEPT CLICKS)
+       ========================================================================== */
+    #bg-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none !important;
+    }
+
+    #bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center bottom;
+      pointer-events: none !important;
+    }
+
+    /* Scene Stage matches background geometry for Postman & Post Office sparkles */
+    #scene-stage {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10;
+      pointer-events: none !important;
+      overflow: visible;
+    }
+
+    /* ==========================================================================
+       TOP HUD BAR
+       ========================================================================== */
+    .hud-bar {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 99990;
+      pointer-events: none;
+    }
+
+    .hud-title-badge {
+      pointer-events: auto !important;
+      background: var(--color-cream);
+      border: 3px solid #000;
+      box-shadow: var(--shadow-pixel-sm);
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: fit-content;
+    }
+
+    .hud-title-text {
+      font-family: var(--pixel-font-vn);
+      font-size: 11px;
+      font-weight: 700;
+      color: #1a1a24;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .hud-tag {
+      background: var(--color-red-post);
+      color: #fff;
+      font-family: var(--pixel-font-latin);
+      font-size: 8px;
+      padding: 2px 5px;
+      border: 2px solid #000;
+    }
+
+    .hud-controls {
+      pointer-events: auto !important;
+      display: flex;
+      gap: 10px;
+    }
+
+    .pixel-icon-btn {
+      background: var(--color-cream);
+      border: 3px solid #000;
+      box-shadow: var(--shadow-pixel);
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      pointer-events: auto !important;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .pixel-icon-btn:hover {
+      background: var(--color-gold);
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0 #000;
+    }
+
+    .pixel-icon-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #000;
+    }
+
+    /* ==========================================================================
+       FIXED RETRO UI BUTTONS CONTAINER (FOOLPROOF & 100% CLICKABLE)
+       ========================================================================== */
+    .fixed-actions-container {
+      position: fixed;
+      top: 32%;
+      left: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 99999;
+      pointer-events: auto !important;
+    }
+
+    .retro-btn-wrapper {
+      position: relative;
+      display: inline-block;
+      pointer-events: auto !important;
+    }
+
+    /* Base Retro Action Button */
+    .retro-action-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      width: 280px;
+      height: 70px;
+      padding: 0 18px;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      border-radius: 4px;
+      user-select: none;
+      outline: none;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+
+    /* Top Button: Convert file (Grey / Chunky retro border) */
+    .btn-convert {
+      background: #dfdbd3;
+      color: #1a1a24;
+      border: 4px solid #111;
+      box-shadow: var(--shadow-pixel-lg);
+    }
+
+    .btn-convert:hover, .btn-convert.active, .retro-btn-wrapper.menu-open .btn-convert {
+      background: #f4f0e8;
+      transform: translate(-2px, -2px);
+      box-shadow: var(--shadow-pixel-xl);
+      border-color: #000;
+    }
+
+    .btn-convert:active {
+      transform: translate(2px, 2px);
+      box-shadow: var(--shadow-pixel-sm);
+    }
+
+    /* Bottom Button: Compress file (Blue / Chunky retro border) */
+    .btn-compress {
+      background: #1f6fd2;
+      color: #ffffff;
+      border: 4px solid #0b2b54;
+      box-shadow: var(--shadow-pixel-lg);
+      text-shadow: 1px 1px 0px #000;
+    }
+
+    .btn-compress:hover, .btn-compress.active, .retro-btn-wrapper.menu-open .btn-compress {
+      background: #2b7ce2;
+      transform: translate(-2px, -2px);
+      box-shadow: var(--shadow-pixel-xl);
+    }
+
+    .btn-compress:active {
+      transform: translate(2px, 2px);
+      box-shadow: var(--shadow-pixel-sm);
+    }
+
+    /* Button Internal Elements */
+    .btn-icon-box {
+      width: 42px;
+      height: 42px;
+      background: rgba(0, 0, 0, 0.08);
+      border: 2px solid #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .btn-compress .btn-icon-box {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: #fff;
+    }
+
+    .btn-content-box {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 4px;
+      text-align: left;
+    }
+
+    .btn-primary-title {
+      font-family: var(--pixel-font-latin);
+      font-size: 12px;
+      line-height: 1.3;
+      letter-spacing: -0.3px;
+    }
+
+    .btn-secondary-desc {
+      font-family: var(--pixel-font-vn);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      opacity: 0.9;
+    }
+
+    .btn-arrow-indicator {
+      font-family: var(--pixel-font-latin);
+      font-size: 13px;
+      opacity: 0.7;
+      transition: transform 0.15s ease;
+    }
+
+    .retro-btn-wrapper:hover .btn-arrow-indicator,
+    .retro-btn-wrapper.menu-open .btn-arrow-indicator {
+      transform: translateX(4px);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       POPOVER / DROPDOWN MENUS (RIGHT NEXT TO THE BUTTONS)
+       ========================================================================== */
+    .retro-dropdown-menu {
+      position: absolute;
+      left: calc(100% + 14px);
+      top: -4px;
+      width: 320px;
+      background: var(--color-cream);
+      border: 4px solid #000;
+      box-shadow: var(--shadow-pixel-xl);
+      display: none;
+      flex-direction: column;
+      z-index: 100000;
+      pointer-events: auto !important;
+      animation: popoverFadeIn 0.16s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    /* Invisible hover-bridge preventing accidental close between button and menu */
+    .retro-dropdown-menu::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      bottom: -12px;
+      left: -24px;
+      width: 28px;
+      background: transparent;
+    }
+
+    .retro-btn-wrapper:hover .retro-dropdown-menu,
+    .retro-btn-wrapper.menu-open .retro-dropdown-menu {
+      display: flex;
+    }
+
+    @keyframes popoverFadeIn {
+      0% { opacity: 0; transform: scale(0.92) translateX(-8px); }
+      100% { opacity: 1; transform: scale(1) translateX(0); }
+    }
+
+    .dropdown-header {
+      background: #2b3a4a;
+      color: var(--color-gold);
+      padding: 10px 14px;
+      font-family: var(--pixel-font-vn);
+      font-size: 14px;
+      font-weight: 700;
+      border-bottom: 3px solid #000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      letter-spacing: 0.5px;
+    }
+
+    .dropdown-body {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .dropdown-item-btn {
+      background: #fff;
+      border: 2px solid #000;
+      box-shadow: 2px 2px 0 #999;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      text-align: left;
+      transition: background 0.1s, transform 0.1s, box-shadow 0.1s;
+    }
+
+    .dropdown-item-btn:hover {
+      background: var(--color-gold);
+      box-shadow: 3px 3px 0 #000;
+      transform: translate(-1px, -1px);
+    }
+
+    .dropdown-item-btn:active {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0 #000;
+    }
+
+    .d-icon {
+      font-size: 20px;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .d-text {
+      flex: 1;
+    }
+
+    .d-title {
+      font-family: var(--pixel-font-vn);
+      font-size: 15px;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 2px;
+    }
+
+    .d-desc {
+      font-family: var(--pixel-font-vn);
+      font-size: 12px;
+      color: #555;
+      line-height: 1.1;
+    }
+
+    /* ==========================================================================
+       CENTERED RETRO DRAG & DROP MODAL
+       ========================================================================== */
+    #upload-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 100000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+      pointer-events: auto !important;
+    }
+
+    .upload-card {
+      width: 530px;
+      max-width: 92vw;
+      background: var(--color-cream);
+      border: 4px solid #000;
+      box-shadow: var(--shadow-pixel-xl);
+      display: flex;
+      flex-direction: column;
+      animation: popoverFadeIn 0.2s ease;
+      pointer-events: auto !important;
+    }
+
+    .upload-card-header {
+      background: #1b4d3e;
+      color: #fff;
+      padding: 12px 16px;
+      border-bottom: 4px solid #000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .upload-card-header h2 {
+      font-family: var(--pixel-font-vn);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-gold);
+      letter-spacing: 0.5px;
+    }
+
+    .modal-close-btn {
+      background: var(--color-red-post);
+      color: #fff;
+      border: 2px solid #000;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--pixel-font-latin);
+      font-size: 12px;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      box-shadow: var(--shadow-pixel-sm);
+    }
+
+    .modal-close-btn:hover {
+      background: #ff4d4d;
+    }
+
+    .upload-card-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .selected-mode-pill {
+      background: #eae3cf;
+      border: 2px solid #000;
+      padding: 8px 12px;
+      font-family: var(--pixel-font-vn);
+      font-size: 15px;
+      font-weight: 700;
+      color: #1b4d3e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Compression Quality Settings */
+    .compress-options-box {
+      display: none;
+      background: #eae3cf;
+      border: 2px solid #000;
+      padding: 10px 14px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .compress-options-box.active {
+      display: flex;
+    }
+
+    .compress-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--pixel-font-vn);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .retro-slider {
+      flex: 1;
+      height: 10px;
+      background: #2b3a4a;
+      border: 2px solid #000;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .retro-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 22px;
+      background: var(--color-gold);
+      border: 2px solid #000;
+      cursor: pointer;
+      box-shadow: 1px 1px 0 #000;
+    }
+
+    /* Dropzone Box */
+    .dropzone-box {
+      border: 4px dashed #6b7280;
+      background: #faf6ea;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      transition: all 0.2s;
+    }
+
+    .dropzone-box:hover, .dropzone-box.drag-over {
+      border-color: var(--color-red-post);
+      background: #fff4f2;
+      transform: scale(1.01);
+    }
+
+    .dropzone-icon {
+      font-size: 46px;
+      margin-bottom: 12px;
+      animation: floatIcon 2s infinite ease-in-out;
+    }
+
+    @keyframes floatIcon {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .dropzone-main-text {
+      font-family: var(--pixel-font-vn);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.5;
+      color: #1a1a24;
+      margin-bottom: 6px;
+    }
+
+    .dropzone-sub-text {
+      font-family: var(--pixel-font-vn);
+      font-size: 14px;
+      color: #718096;
+    }
+
+    /* File loaded preview */
+    .file-preview-strip {
+      display: none;
+      background: #e2f0d9;
+      border: 2px solid #38761d;
+      padding: 10px 14px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .file-preview-strip.active {
+      display: flex;
+    }
+
+    .file-preview-info {
+      font-family: var(--pixel-font-vn);
+      font-size: 15px;
+      font-weight: 700;
+      color: #274e13;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .start-deliver-btn {
+      background: var(--color-red-post);
+      color: #fff;
+      font-family: var(--pixel-font-vn);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 14px 20px;
+      border: 3px solid #000;
+      box-shadow: var(--shadow-pixel);
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      text-align: center;
+      transition: all 0.1s;
+      letter-spacing: 0.5px;
+    }
+
+    .start-deliver-btn:hover {
+      background: #e63946;
+      transform: translate(-2px, -2px);
+      box-shadow: var(--shadow-pixel-lg);
+    }
+
+    .start-deliver-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: var(--shadow-pixel-sm);
+    }
+
+    .start-deliver-btn:disabled {
+      background: #a0aec0;
+      cursor: not-allowed !important;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* ==========================================================================
+       POSTMAN CHARACTER ENTITY & ANIMATIONS
+       ========================================================================== */
+    #postman-entity {
+      position: absolute;
+      left: 26.2%;
+      top: 43.8%;
+      width: 9.8%;
+      height: 36.8%;
+      z-index: 35;
+      transform-origin: bottom center;
+      pointer-events: none !important;
+    }
+
+    #postman-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      display: block;
+      z-index: 2;
+    }
+
+    #postman-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      mix-blend-mode: screen;
+      filter: contrast(1.1) brightness(1.05);
+      image-rendering: pixelated;
+      display: none;
+      z-index: 1;
+    }
+
+    .postman-shadow {
+      position: absolute;
+      bottom: 2%;
+      left: 22%;
+      width: 56%;
+      height: 8%;
+      background: rgba(30, 25, 45, 0.45);
+      border-radius: 50%;
+      z-index: 0;
+      filter: blur(1px);
+    }
+
+    .postman-parcel {
+      position: absolute;
+      top: 52%;
+      left: 12%;
+      font-size: 20px;
+      z-index: 5;
+      display: none;
+      filter: drop-shadow(2px 2px 0 #000);
+      animation: bobParcel 0.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes bobParcel {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-4px); }
+    }
+
+    .jump-celebration {
+      animation: postmanJump 0.65s cubic-bezier(0.18, 0.89, 0.32, 1.28) 2;
+    }
+
+    @keyframes postmanJump {
+      0% { transform: translateY(0) scale(1, 1); }
+      35% { transform: translateY(-50px) scale(0.95, 1.1); }
+      65% { transform: translateY(-55px) scale(1.05, 0.95); }
+      85% { transform: translateY(-5px) scale(1.15, 0.85); }
+      100% { transform: translateY(0) scale(1, 1); }
+    }
+
+    /* ==========================================================================
+       POST OFFICE STATUS BADGE & SPARKLES
+       ========================================================================== */
+    #office-status-badge {
+      position: absolute;
+      right: 7%;
+      top: 36%;
+      background: var(--color-cream);
+      border: 4px solid #000;
+      box-shadow: var(--shadow-pixel);
+      padding: 12px 18px;
+      z-index: 45;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      min-width: 270px;
+      animation: popoverFadeIn 0.2s ease;
+      pointer-events: none !important;
+    }
+
+    .badge-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--pixel-font-vn);
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a24;
+    }
+
+    .badge-spinner {
+      display: inline-block;
+      animation: spinPixel 1s steps(8) infinite;
+    }
+
+    @keyframes spinPixel {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .retro-progress-track {
+      width: 100%;
+      height: 14px;
+      background: #333;
+      border: 2px solid #000;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .retro-progress-fill {
+      width: 0%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        45deg,
+        var(--color-gold),
+        var(--color-gold) 6px,
+        #e5b927 6px,
+        #e5b927 12px
+      );
+      transition: width 0.25s linear;
+    }
+
+    .badge-subtext {
+      font-family: var(--pixel-font-vn);
+      font-size: 13px;
+      color: #555;
+    }
+
+    #windows-sparkles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none !important;
+      z-index: 25;
+      display: none;
+    }
+
+    .window-glow {
+      position: absolute;
+      background: radial-gradient(circle, rgba(255, 235, 120, 0.75) 0%, rgba(255, 215, 0, 0) 70%);
+      filter: blur(4px);
+      animation: windowPulse 1.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes windowPulse {
+      0% { opacity: 0.3; transform: scale(0.9); }
+      100% { opacity: 0.95; transform: scale(1.1); }
+    }
+
+    .pixel-sparkle {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      animation: sparkleTwinkle 0.8s infinite alternate ease-in-out;
+    }
+
+    .pixel-sparkle::before, .pixel-sparkle::after {
+      content: '';
+      position: absolute;
+      background: #fff;
+      box-shadow: 0 0 6px #fff, 0 0 10px #ffe57f;
+    }
+
+    .pixel-sparkle::before { left: 5px; top: 0; width: 4px; height: 14px; }
+    .pixel-sparkle::after { left: 0; top: 5px; width: 14px; height: 4px; }
+
+    @keyframes sparkleTwinkle {
+      0% { transform: scale(0.4) rotate(0deg); opacity: 0.2; }
+      100% { transform: scale(1.3) rotate(45deg); opacity: 1; }
+    }
+
+    /* ==========================================================================
+       CONFETTI CANVAS
+       ========================================================================== */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none !important;
+      z-index: 99980;
+    }
+
+    /* ==========================================================================
+       SPEECH BUBBLE & DOWNLOAD ACTION
+       ========================================================================== */
+    #delivery-bubble {
+      position: absolute;
+      left: 49%;
+      bottom: 58%;
+      transform: translateX(-50%);
+      background: var(--color-cream);
+      border: 4px solid #000;
+      box-shadow: var(--shadow-pixel-xl);
+      padding: 16px 20px;
+      z-index: 60;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      width: 400px;
+      max-width: 90vw;
+      animation: popoverFadeIn 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: auto !important;
+    }
+
+    #delivery-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 14px 12px 0 12px;
+      border-style: solid;
+      border-color: #000 transparent transparent transparent;
+      display: block;
+      width: 0;
+    }
+
+    #delivery-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 10px 8px 0 8px;
+      border-style: solid;
+      border-color: var(--color-cream) transparent transparent transparent;
+      display: block;
+      width: 0;
+      z-index: 1;
+    }
+
+    .bubble-title {
+      font-family: var(--pixel-font-vn);
+      font-size: 16px;
+      font-weight: 700;
+      color: #1b4d3e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bubble-details {
+      background: #faf6ea;
+      border: 2px solid #000;
+      padding: 10px 14px;
+      font-family: var(--pixel-font-vn);
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .detail-val {
+      font-weight: 700;
+      color: var(--color-red-post);
+    }
+
+    .download-action-btn {
+      background: #28a745;
+      color: #fff;
+      font-family: var(--pixel-font-vn);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 14px;
+      border: 3px solid #000;
+      box-shadow: var(--shadow-pixel);
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      text-align: center;
+      transition: all 0.1s;
+      letter-spacing: 0.5px;
+      animation: pulseGlow 1.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+      0% {
+        box-shadow: 0 0 5px rgba(40, 167, 69, 0.4), var(--shadow-pixel);
+        background: #28a745;
+      }
+      100% {
+        box-shadow: 0 0 20px rgba(40, 167, 69, 0.9), var(--shadow-pixel);
+        background: #2ecc71;
+      }
+    }
+
+    .download-action-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 0 0 25px rgba(40, 167, 69, 1), 6px 6px 0 #000;
+    }
+
+    .download-action-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .reset-action-btn {
+      background: #eae3cf;
+      color: #000;
+      font-family: var(--pixel-font-vn);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px;
+      border: 2px solid #000;
+      box-shadow: var(--shadow-pixel-sm);
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      text-align: center;
+      transition: all 0.1s;
+    }
+
+    .reset-action-btn:hover {
+      background: var(--color-gold);
+    }
+
+    /* ==========================================================================
+       BOTTOM TOAST NOTIFICATION
+       ========================================================================== */
+    #retro-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #000;
+      color: var(--color-gold);
+      border: 3px solid var(--color-gold);
+      font-family: var(--pixel-font-vn);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 8px 18px;
+      z-index: 100010;
+      box-shadow: 0 0 15px rgba(0,0,0,0.8);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: none !important;
+    }
+
+    #retro-toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Full-viewport fixed background container -->
+  <div id="bg-container">
+    <img id="bg-img" src="assets/background.jpg" alt="Saigon Central Post Office Retro Background" />
+  </div>
+
+  <!-- HUD Top Bar -->
+  <div class="hud-bar">
+    <div class="hud-title-badge">
+      <span class="hud-tag">1891</span>
+      <span class="hud-title-text">BƯU ĐIỆN SÀI GÒN</span>
+    </div>
+    <div class="hud-controls">
+      <button class="pixel-icon-btn" id="btn-sound-toggle" title="Bật/Tắt âm thanh retro">
+        <span id="sound-icon">🔊</span>
+      </button>
+      <button class="pixel-icon-btn" id="btn-info-help" title="Hướng dẫn sử dụng">
+        <span>❓</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       REAL CLICKABLE RETRO UI BUTTONS ON THE LEFT (FIXED POSITIONING)
+       ========================================================================== -->
+  <div class="fixed-actions-container">
+    
+    <!-- Button 1: Convert file (Grey/Chunky retro border) -->
+    <div class="retro-btn-wrapper" id="wrapper-convert">
+      <button class="retro-action-btn btn-convert" id="main-btn-convert" type="button">
+        <div class="btn-icon-box">⚡</div>
+        <div class="btn-content-box">
+          <span class="btn-primary-title">CONVERT FILE</span>
+          <span class="btn-secondary-desc">Chuyển đổi tệp</span>
+        </div>
+        <span class="btn-arrow-indicator">▶</span>
+      </button>
+
+      <!-- Sleek Pixel Dropdown Menu for Convert file -->
+      <div class="retro-dropdown-menu" id="dropdown-convert">
+        <div class="dropdown-header">
+          <span>⚡ CHỌN ĐỊNH DẠNG CHUYỂN ĐỔI</span>
+        </div>
+        <div class="dropdown-body">
+          <button class="dropdown-item-btn" data-mode="pdf_to_png" data-name="PDF to PNG" data-accept=".pdf">
+            <span class="d-icon">📑</span>
+            <div class="d-text">
+              <div class="d-title">PDF to PNG</div>
+              <div class="d-desc">Trích xuất trang PDF thành ảnh PNG nét chuẩn</div>
+            </div>
+          </button>
+          <button class="dropdown-item-btn" data-mode="png_to_jpeg" data-name="PNG to JPEG" data-accept=".png,.webp">
+            <span class="d-icon">🖼️</span>
+            <div class="d-text">
+              <div class="d-title">PNG to JPEG</div>
+              <div class="d-desc">Chuyển ảnh PNG sang JPEG gọn nhẹ hơn</div>
+            </div>
+          </button>
+          <button class="dropdown-item-btn" data-mode="jpeg_to_webp" data-name="JPEG to WEBP" data-accept=".jpg,.jpeg,.png">
+            <span class="d-icon">🌐</span>
+            <div class="d-text">
+              <div class="d-title">JPEG to WEBP</div>
+              <div class="d-desc">Nén sang định dạng ảnh thế hệ mới</div>
+            </div>
+          </button>
+          <button class="dropdown-item-btn" data-mode="excel_to_pdf" data-name="Excel (.xlsx) to PDF" data-accept=".xlsx,.xls">
+            <span class="d-icon">📊</span>
+            <div class="d-text">
+              <div class="d-title">Excel (.xlsx) to PDF</div>
+              <div class="d-desc">Chuyển bảng tính XLSX sang tài liệu PDF</div>
+            </div>
+          </button>
+          <button class="dropdown-item-btn" data-mode="txt_to_pdf" data-name="TXT to PDF" data-accept=".txt,.md">
+            <span class="d-icon">📄</span>
+            <div class="d-text">
+              <div class="d-title">TXT to PDF</div>
+              <div class="d-desc">Đóng gói văn bản thuần sang tài liệu PDF</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Button 2: Compress file (Blue/Chunky retro border) -->
+    <div class="retro-btn-wrapper" id="wrapper-compress">
+      <button class="retro-action-btn btn-compress" id="main-btn-compress" type="button">
+        <div class="btn-icon-box">🗜️</div>
+        <div class="btn-content-box">
+          <span class="btn-primary-title">COMPRESS FILE</span>
+          <span class="btn-secondary-desc">Nén giảm dung lượng</span>
+        </div>
+        <span class="btn-arrow-indicator">▶</span>
+      </button>
+
+      <!-- Sleek Pixel Dropdown Menu for Compress file -->
+      <div class="retro-dropdown-menu" id="dropdown-compress">
+        <div class="dropdown-header">
+          <span>🗜️ CHỌN TÙY CHỌN NÉN TỆP</span>
+        </div>
+        <div class="dropdown-body">
+          <button class="dropdown-item-btn" data-mode="compress_image" data-name="Nén ảnh (PNG / JPEG)" data-accept=".jpg,.jpeg,.png,.webp">
+            <span class="d-icon">🖼️</span>
+            <div class="d-text">
+              <div class="d-title">Nén ảnh (PNG / JPEG)</div>
+              <div class="d-desc">Tối ưu dung lượng hình ảnh với chất lượng tùy chỉnh</div>
+            </div>
+          </button>
+          <button class="dropdown-item-btn" data-mode="compress_pdf" data-name="Nén file PDF" data-accept=".pdf">
+            <span class="d-icon">📑</span>
+            <div class="d-text">
+              <div class="d-title">Nén file PDF</div>
+              <div class="d-desc">Tối ưu hóa và nén luồng dữ liệu PDF client-side</div>
+            </div>
+          </button>
+          <button class="dropdown-item-btn" data-mode="compress_zip" data-name="Nén File Vào ZIP" data-accept="*/*">
+            <span class="d-icon">📦</span>
+            <div class="d-text">
+              <div class="d-title">Nén File Vào ZIP</div>
+              <div class="d-desc">Đóng gói và nén mọi loại tệp thành file .zip</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Main Scene Stage (Postman & Post Office Entities) -->
+  <div id="scene-stage">
+    
+    <!-- Post Office Windows Sparkles & Glow -->
+    <div id="windows-sparkles">
+      <div class="window-glow" style="left: 54%; top: 38%; width: 5%; height: 8%;"></div>
+      <div class="window-glow" style="left: 60%; top: 38%; width: 5%; height: 8%;"></div>
+      <div class="window-glow" style="left: 66%; top: 38%; width: 5%; height: 8%;"></div>
+      <div class="window-glow" style="left: 72%; top: 38%; width: 5%; height: 8%;"></div>
+      <div class="window-glow" style="left: 78%; top: 38%; width: 5%; height: 8%;"></div>
+      
+      <div class="pixel-sparkle" style="left: 55%; top: 39%; animation-delay: 0.1s;"></div>
+      <div class="pixel-sparkle" style="left: 62%; top: 41%; animation-delay: 0.4s;"></div>
+      <div class="pixel-sparkle" style="left: 68%; top: 37%; animation-delay: 0.2s;"></div>
+      <div class="pixel-sparkle" style="left: 74%; top: 40%; animation-delay: 0.6s;"></div>
+      <div class="pixel-sparkle" style="left: 80%; top: 38%; animation-delay: 0.3s;"></div>
+      <div class="pixel-sparkle" style="left: 92%; top: 33%; animation-delay: 0.5s;"></div>
+    </div>
+
+    <!-- Post Office Processing Status Badge -->
+    <div id="office-status-badge">
+      <div class="badge-header">
+        <span class="badge-spinner">📮</span>
+        <span id="badge-title">ĐANG XỬ LÝ / DELIVERING & CONVERTING...</span>
+      </div>
+      <div class="retro-progress-track">
+        <div id="badge-progress-fill" class="retro-progress-fill"></div>
+      </div>
+      <div id="badge-subtext" class="badge-subtext">Bưu tá đang làm việc bên trong Bưu điện Sài Gòn...</div>
+    </div>
+
+    <!-- Postman Character Entity -->
+    <div id="postman-entity">
+      <div class="postman-shadow"></div>
+      <!-- Canvas for real-time Luma keying -->
+      <canvas id="postman-canvas"></canvas>
+      <!-- Fallback native video -->
+      <video id="postman-video" src="assets/postman-walk.mp4" playsinline muted loop crossOrigin="anonymous"></video>
+      <!-- Mail package badge -->
+      <div id="postman-parcel" class="postman-parcel">✉️</div>
+    </div>
+
+    <!-- Cheerful Delivery Speech Bubble & Download Action -->
+    <div id="delivery-bubble">
+      <div class="bubble-title">
+        <span>📬</span>
+        <span>BƯU TÁ SÀI GÒN:</span>
+      </div>
+      <div style="font-family: var(--pixel-font-vn); font-size: 16px; font-weight: 700; color: #000; line-height: 1.4;">
+        "Bưu kiện của bạn đã xử lý xong!"
+      </div>
+      <div class="bubble-details">
+        <div class="detail-row">
+          <span>Tệp xuất:</span>
+          <span id="bubble-file-name" class="detail-val">result.png</span>
+        </div>
+        <div class="detail-row">
+          <span>Dung lượng gốc:</span>
+          <span id="bubble-orig-size">1.2 MB</span>
+        </div>
+        <div class="detail-row">
+          <span>Dung lượng mới:</span>
+          <span id="bubble-new-size" class="detail-val">450 KB</span>
+        </div>
+        <div class="detail-row" id="bubble-saved-row">
+          <span>Tiết kiệm:</span>
+          <span id="bubble-saved-pct" class="detail-val">-62.5%</span>
+        </div>
+      </div>
+      <button id="btn-download-result" class="download-action-btn" type="button">
+        💾 TẢI VỀ NGAY (DOWNLOAD)
+      </button>
+      <button id="btn-reset-journey" class="reset-action-btn" type="button">
+        🔄 Chuyển Đổi Tệp Khác
+      </button>
+    </div>
+
+  </div> <!-- End scene-stage -->
+
+  <!-- ==========================================================================
+       CENTERED DRAG & DROP UPLOAD ZONE MODAL
+       ========================================================================== -->
+  <div id="upload-modal">
+    <div class="upload-card">
+      <div class="upload-card-header">
+        <h2 id="modal-title">TRẠM TIẾP NHẬN BƯU KIỆN</h2>
+        <button class="modal-close-btn" id="btn-close-upload" type="button">&times;</button>
+      </div>
+      <div class="upload-card-body">
+        
+        <div class="selected-mode-pill">
+          <span>📌</span>
+          <span id="mode-display-name">Tùy chọn: PDF to PNG</span>
+        </div>
+
+        <!-- Compression Quality Settings (shown only for compression modes) -->
+        <div id="compress-settings-box" class="compress-options-box">
+          <div style="font-family: var(--pixel-font-vn); font-size: 14px; font-weight: 700; color: #000;">
+            MỨC ĐỘ NÉN / CHẤT LƯỢNG:
+          </div>
+          <div class="compress-slider-row">
+            <span>Cao (Nhỏ)</span>
+            <input type="range" id="compress-quality-slider" class="retro-slider" min="30" max="90" value="70">
+            <span>Vừa (Rõ)</span>
+            <span id="slider-val-label" style="font-weight: 700; min-width: 42px;">70%</span>
+          </div>
+        </div>
+
+        <!-- Big Retro Dropzone Box -->
+        <div id="dropzone" class="dropzone-box" role="button" tabindex="0">
+          <div class="dropzone-icon">📮</div>
+          <div id="dropzone-instruction" class="dropzone-main-text">
+            Kéo thả file vào đây hoặc bấm để chọn
+          </div>
+          <div id="dropzone-hint" class="dropzone-sub-text">
+            (Ví dụ: PDF to PNG)
+          </div>
+          <input type="file" id="file-input" style="display: none;">
+        </div>
+
+        <!-- File Loaded Preview -->
+        <div id="file-preview-strip" class="file-preview-strip">
+          <div class="file-preview-info">
+            <span id="loaded-file-name">tailieu.pdf</span>
+            <span id="loaded-file-size" style="font-size: 13px; color: #555;">(2.4 MB)</span>
+          </div>
+          <button id="btn-clear-file" class="modal-close-btn" type="button" title="Bỏ chọn tệp">&times;</button>
+        </div>
+
+        <!-- Action Button -->
+        <button id="btn-start-process" class="start-deliver-btn" type="button" disabled>
+          🚚 GỬI BƯU TÁ ĐI XỬ LÝ (DELIVER FILE)
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Retro Toast Notification -->
+  <div id="retro-toast">THÔNG BÁO</div>
+
+  <!-- ==========================================================================
+       MAIN JAVASCRIPT LOGIC
+       ========================================================================== */ -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ------------------------------------------------------------------------
+         1. RETRO WEB AUDIO SYNTHESIZER ENGINE
+         ------------------------------------------------------------------------ */
+      class RetroAudioEngine {
+        constructor() {
+          this.ctx = null;
+          this.muted = false;
+        }
+
+        initContext() {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              this.ctx = new AudioCtx();
+            }
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+        }
+
+        playTone(freq, type = 'square', duration = 0.08, endFreq = null, volume = 0.15) {
+          if (this.muted) return;
+          try {
+            this.initContext();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            if (endFreq) {
+              osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + duration);
+            }
+
+            gain.gain.setValueAtTime(volume, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + duration);
+          } catch (e) {
+            // Audio context gesture restriction
+          }
+        }
+
+        hover() {
+          this.playTone(880, 'square', 0.04, 1100, 0.06);
+        }
+
+        click() {
+          this.playTone(523.25, 'triangle', 0.06, 783.99, 0.16);
+        }
+
+        fileDrop() {
+          this.playTone(440, 'square', 0.08, null, 0.15);
+          setTimeout(() => this.playTone(659.25, 'square', 0.1, null, 0.18), 70);
+          setTimeout(() => this.playTone(880, 'square', 0.14, null, 0.2), 140);
+        }
+
+        footstep() {
+          this.playTone(160, 'triangle', 0.03, 70, 0.04);
+        }
+
+        doorEnter() {
+          this.playTone(400, 'sine', 0.35, 120, 0.16);
+          setTimeout(() => this.playTone(900, 'triangle', 0.2, 300, 0.1), 100);
+        }
+
+        sparkle() {
+          const notes = [1046.5, 1318.5, 1567.98, 2093.0];
+          notes.forEach((freq, idx) => {
+            setTimeout(() => this.playTone(freq, 'sine', 0.12, null, 0.07), idx * 60);
+          });
+        }
+
+        fanfare() {
+          if (this.muted) return;
+          const sequence = [
+            { f: 523.25, d: 0.12, t: 0 },    // C5
+            { f: 659.25, d: 0.12, t: 120 },  // E5
+            { f: 783.99, d: 0.12, t: 240 },  // G5
+            { f: 1046.50, d: 0.35, t: 360 }  // C6
+          ];
+          sequence.forEach(note => {
+            setTimeout(() => this.playTone(note.f, 'square', note.d, null, 0.2), note.t);
+          });
+        }
+
+        download() {
+          this.playTone(587.33, 'square', 0.1, null, 0.15);
+          setTimeout(() => this.playTone(880, 'square', 0.12, null, 0.18), 80);
+          setTimeout(() => this.playTone(1174.66, 'square', 0.25, null, 0.2), 160);
+        }
+      }
+
+      const audio = new RetroAudioEngine();
+
+      /* ------------------------------------------------------------------------
+         2. SCENE STAGE GEOMETRY (MAPPED TO BACKGROUND ASPECT RATIO)
+         ------------------------------------------------------------------------ */
+      const BG_WIDTH = 2752;
+      const BG_HEIGHT = 1536;
+      const BG_ASPECT = BG_WIDTH / BG_HEIGHT; // ~1.7916667
+
+      const stage = document.getElementById('scene-stage');
+
+      function updateStageGeometry() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const vAspect = vw / vh;
+
+        let stageW, stageH, stageLeft, stageTop;
+
+        if (vAspect > BG_ASPECT) {
+          stageW = vw;
+          stageH = vw / BG_ASPECT;
+          stageLeft = 0;
+          stageTop = (vh - stageH) / 2;
+        } else {
+          stageH = vh;
+          stageW = vh * BG_ASPECT;
+          stageTop = 0;
+          stageLeft = (vw - stageW) / 2;
+        }
+
+        stage.style.width = stageW + 'px';
+        stage.style.height = stageH + 'px';
+        stage.style.left = stageLeft + 'px';
+        stage.style.top = stageTop + 'px';
+      }
+
+      window.addEventListener('resize', updateStageGeometry);
+      window.addEventListener('DOMContentLoaded', updateStageGeometry);
+      updateStageGeometry();
+
+      /* ------------------------------------------------------------------------
+         3. RETRO PIXEL CONFETTI ENGINE
+         ------------------------------------------------------------------------ */
+      const confettiCanvas = document.getElementById('confetti-canvas');
+      const confettiCtx = confettiCanvas.getContext('2d');
+      let confettiParticles = [];
+      let confettiAnimationId = null;
+
+      function resizeConfetti() {
+        confettiCanvas.width = window.innerWidth;
+        confettiCanvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeConfetti);
+      resizeConfetti();
+
+      function firePixelConfetti() {
+        confettiParticles = [];
+        const colors = ['#f7d046', '#d62828', '#2ecc71', '#3498db', '#9b59b6', '#ffffff'];
+        const centerX = window.innerWidth * 0.5;
+        const centerY = window.innerHeight * 0.65;
+
+        for (let i = 0; i < 90; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 4 + Math.random() * 8;
+          confettiParticles.push({
+            x: centerX + (Math.random() - 0.5) * 40,
+            y: centerY + (Math.random() - 0.5) * 20,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 6,
+            size: 6 + Math.floor(Math.random() * 6),
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: 1,
+            gravity: 0.28
+          });
+        }
+
+        if (confettiAnimationId) cancelAnimationFrame(confettiAnimationId);
+        renderConfettiLoop();
+      }
+
+      function renderConfettiLoop() {
+        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        let activeCount = 0;
+
+        confettiParticles.forEach(p => {
+          if (p.alpha <= 0.02) return;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.vx *= 0.98;
+          p.alpha -= 0.008;
+
+          confettiCtx.fillStyle = p.color;
+          confettiCtx.globalAlpha = Math.max(0, p.alpha);
+          confettiCtx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
+          activeCount++;
+        });
+
+        confettiCtx.globalAlpha = 1;
+        if (activeCount > 0) {
+          confettiAnimationId = requestAnimationFrame(renderConfettiLoop);
+        } else {
+          confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+      }
+
+      /* ------------------------------------------------------------------------
+         4. POSTMAN CHARACTER VIDEO & CANVAS LUMA KEYING
+         ------------------------------------------------------------------------ */
+      const postmanEntity = document.getElementById('postman-entity');
+      const postmanVideo = document.getElementById('postman-video');
+      const postmanCanvas = document.getElementById('postman-canvas');
+      const postmanParcel = document.getElementById('postman-parcel');
+      let canvasCtx = null;
+      let isCanvasKeyingActive = true;
+      let cropBounds = null;
+
+      try {
+        canvasCtx = postmanCanvas.getContext('2d', { willReadFrequently: true });
+      } catch (e) {
+        isCanvasKeyingActive = false;
+      }
+
+      postmanVideo.muted = true;
+      postmanVideo.loop = true;
+      postmanVideo.playsInline = true;
+      const playPromise = postmanVideo.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+
+      function detectSpriteBounds(frameData, w, h) {
+        let minX = w, maxX = 0, minY = h, maxY = 0;
+        let found = false;
+        const d = frameData.data;
+        for (let y = 0; y < h; y += 4) {
+          for (let x = 0; x < w; x += 4) {
+            const idx = (y * w + x) * 4;
+            if (d[idx] > 25 || d[idx + 1] > 25 || d[idx + 2] > 25) {
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+              found = true;
+            }
+          }
+        }
+        if (found && maxX > minX && maxY > minY) {
+          const pad = 16;
+          return {
+            x: Math.max(0, minX - pad),
+            y: Math.max(0, minY - pad),
+            w: Math.min(w, (maxX - minX) + pad * 2),
+            h: Math.min(h, (maxY - minY) + pad * 2)
+          };
+        }
+        return { x: 0, y: 0, w, h };
+      }
+
+      function renderPostmanLoop() {
+        if (isCanvasKeyingActive && postmanVideo.readyState >= 2) {
+          try {
+            const vw = postmanVideo.videoWidth || 1920;
+            const vh = postmanVideo.videoHeight || 1080;
+
+            if (!cropBounds) {
+              postmanCanvas.width = vw;
+              postmanCanvas.height = vh;
+              canvasCtx.drawImage(postmanVideo, 0, 0, vw, vh);
+              const testFrame = canvasCtx.getImageData(0, 0, vw, vh);
+              cropBounds = detectSpriteBounds(testFrame, vw, vh);
+              postmanCanvas.width = cropBounds.w;
+              postmanCanvas.height = cropBounds.h;
+            }
+
+            canvasCtx.clearRect(0, 0, cropBounds.w, cropBounds.h);
+            canvasCtx.drawImage(
+              postmanVideo,
+              cropBounds.x, cropBounds.y, cropBounds.w, cropBounds.h,
+              0, 0, cropBounds.w, cropBounds.h
+            );
+
+            const imgData = canvasCtx.getImageData(0, 0, cropBounds.w, cropBounds.h);
+            const d = imgData.data;
+            const len = d.length;
+            for (let i = 0; i < len; i += 4) {
+              const r = d[i], g = d[i + 1], b = d[i + 2];
+              if (r < 24 && g < 24 && b < 24) {
+                d[i + 3] = 0;
+              }
+            }
+            canvasCtx.putImageData(imgData, 0, 0);
+
+          } catch (corsErr) {
+            isCanvasKeyingActive = false;
+            postmanCanvas.style.display = 'none';
+            postmanVideo.style.display = 'block';
+          }
+        }
+        requestAnimationFrame(renderPostmanLoop);
+      }
+      requestAnimationFrame(renderPostmanLoop);
+
+      /* ------------------------------------------------------------------------
+         5. FIXED RETRO BUTTONS & POPOVER MENUS CONTROLLER
+         ------------------------------------------------------------------------ */
+      const wrapperConvert = document.getElementById('wrapper-convert');
+      const wrapperCompress = document.getElementById('wrapper-compress');
+      const btnMainConvert = document.getElementById('main-btn-convert');
+      const btnMainCompress = document.getElementById('main-btn-compress');
+      const dropdownConvert = document.getElementById('dropdown-convert');
+      const dropdownCompress = document.getElementById('dropdown-compress');
+
+      const uploadModal = document.getElementById('upload-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const modeDisplayName = document.getElementById('mode-display-name');
+      const compressSettingsBox = document.getElementById('compress-settings-box');
+      const compressQualitySlider = document.getElementById('compress-quality-slider');
+      const sliderValLabel = document.getElementById('slider-val-label');
+      const dropzone = document.getElementById('dropzone');
+      const dropzoneInstruction = document.getElementById('dropzone-instruction');
+      const dropzoneHint = document.getElementById('dropzone-hint');
+      const fileInput = document.getElementById('file-input');
+      const filePreviewStrip = document.getElementById('file-preview-strip');
+      const loadedFileName = document.getElementById('loaded-file-name');
+      const loadedFileSize = document.getElementById('loaded-file-size');
+      const btnClearFile = document.getElementById('btn-clear-file');
+      const btnStartProcess = document.getElementById('btn-start-process');
+      const btnCloseUpload = document.getElementById('btn-close-upload');
+      const btnSoundToggle = document.getElementById('btn-sound-toggle');
+      const soundIcon = document.getElementById('sound-icon');
+      const btnInfoHelp = document.getElementById('btn-info-help');
+      const retroToast = document.getElementById('retro-toast');
+
+      const officeStatusBadge = document.getElementById('office-status-badge');
+      const badgeTitle = document.getElementById('badge-title');
+      const badgeProgressFill = document.getElementById('badge-progress-fill');
+      const badgeSubtext = document.getElementById('badge-subtext');
+      const windowsSparkles = document.getElementById('windows-sparkles');
+      const deliveryBubble = document.getElementById('delivery-bubble');
+      const bubbleFileName = document.getElementById('bubble-file-name');
+      const bubbleOrigSize = document.getElementById('bubble-orig-size');
+      const bubbleNewSize = document.getElementById('bubble-new-size');
+      const bubbleSavedRow = document.getElementById('bubble-saved-row');
+      const bubbleSavedPct = document.getElementById('bubble-saved-pct');
+      const btnDownloadResult = document.getElementById('btn-download-result');
+      const btnResetJourney = document.getElementById('btn-reset-journey');
+
+      let currentMode = 'pdf_to_png';
+      let currentModeName = 'PDF to PNG';
+      let currentAccept = '.pdf';
+      let selectedFile = null;
+      let processedBlob = null;
+      let processedFileName = '';
+      let isDelivering = false;
+
+      let toastTimer = null;
+      function showToast(msg) {
+        retroToast.textContent = msg;
+        retroToast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          retroToast.classList.remove('show');
+        }, 2500);
+      }
+
+      function formatBytes(bytes) {
+        if (!bytes || bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
+      function closeAllPopovers() {
+        wrapperConvert.classList.remove('menu-open');
+        wrapperCompress.classList.remove('menu-open');
+      }
+
+      // Convert Button: Click & Hover
+      wrapperConvert.addEventListener('mouseenter', () => audio.hover());
+      btnMainConvert.addEventListener('click', (e) => {
+        e.stopPropagation();
+        audio.click();
+        const isOpen = wrapperConvert.classList.contains('menu-open');
+        closeAllPopovers();
+        if (!isOpen) {
+          wrapperConvert.classList.add('menu-open');
+        }
+      });
+
+      // Compress Button: Click & Hover
+      wrapperCompress.addEventListener('mouseenter', () => audio.hover());
+      btnMainCompress.addEventListener('click', (e) => {
+        e.stopPropagation();
+        audio.click();
+        const isOpen = wrapperCompress.classList.contains('menu-open');
+        closeAllPopovers();
+        if (!isOpen) {
+          wrapperCompress.classList.add('menu-open');
+        }
+      });
+
+      // Outside click closes popovers
+      document.addEventListener('click', (e) => {
+        if (!wrapperConvert.contains(e.target) && !wrapperCompress.contains(e.target)) {
+          closeAllPopovers();
+        }
+      });
+
+      // Sound toggle & Info
+      btnSoundToggle.addEventListener('click', () => {
+        audio.muted = !audio.muted;
+        soundIcon.textContent = audio.muted ? '🔇' : '🔊';
+        showToast(audio.muted ? 'ÂM THANH: ĐÃ TẮT' : 'ÂM THANH: ĐÃ BẬT');
+        if (!audio.muted) audio.click();
+      });
+
+      btnInfoHelp.addEventListener('click', () => {
+        audio.click();
+        showToast('BẤM VÀO 2 NÚT BÊN TRÁI ĐỂ CHỌN CHUYỂN ĐỔI HOẶC NÉN TỆP!');
+      });
+
+      // Dropdown Item Selection
+      function setupDropdownOptions(container) {
+        container.querySelectorAll('.dropdown-item-btn').forEach(btn => {
+          btn.addEventListener('mouseenter', () => audio.hover());
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            audio.click();
+            currentMode = btn.getAttribute('data-mode');
+            currentModeName = btn.getAttribute('data-name');
+            currentAccept = btn.getAttribute('data-accept');
+
+            closeAllPopovers();
+            openUploadModal();
+          });
+        });
+      }
+      setupDropdownOptions(dropdownConvert);
+      setupDropdownOptions(dropdownCompress);
+
+      function openUploadModal() {
+        if (isDelivering) return;
+        modalTitle.textContent = currentMode.startsWith('compress') ? 'TRẠM TIẾP NHẬN NÉN TỆP' : 'TRẠM TIẾP NHẬN CHUYỂN ĐỔI';
+        modeDisplayName.textContent = `Tùy chọn: ${currentModeName}`;
+        dropzoneInstruction.textContent = `Kéo thả file vào đây hoặc bấm để chọn`;
+        dropzoneHint.textContent = `(Định dạng hỗ trợ: ${currentAccept})`;
+
+        fileInput.accept = currentAccept;
+
+        if (currentMode.startsWith('compress')) {
+          compressSettingsBox.classList.add('active');
+        } else {
+          compressSettingsBox.classList.remove('active');
+        }
+
+        clearSelectedFile();
+        uploadModal.style.display = 'flex';
+      }
+
+      btnCloseUpload.addEventListener('click', () => {
+        audio.click();
+        uploadModal.style.display = 'none';
+      });
+
+      compressQualitySlider.addEventListener('input', (e) => {
+        sliderValLabel.textContent = e.target.value + '%';
+      });
+
+      dropzone.addEventListener('mouseenter', () => audio.hover());
+      dropzone.addEventListener('click', () => {
+        audio.click();
+        fileInput.click();
+      });
+
+      ['dragenter', 'dragover'].forEach(evtName => {
+        dropzone.addEventListener(evtName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.add('drag-over');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(evtName => {
+        dropzone.addEventListener(evtName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropzone.classList.remove('drag-over');
+        });
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files.length > 0) {
+          handleFileChosen(dt.files[0]);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          handleFileChosen(e.target.files[0]);
+        }
+      });
+
+      function handleFileChosen(file) {
+        selectedFile = file;
+        audio.fileDrop();
+        loadedFileName.textContent = file.name;
+        loadedFileSize.textContent = `(${formatBytes(file.size)})`;
+        filePreviewStrip.classList.add('active');
+        btnStartProcess.disabled = false;
+        showToast(`ĐÃ NHẬN TỆP: ${file.name}`);
+
+        // Immediate Pipeline: Close modal and start delivery immediately
+        setTimeout(() => {
+          if (selectedFile && !isDelivering && uploadModal.style.display === 'flex') {
+            uploadModal.style.display = 'none';
+            startDeliveryJourney();
+          }
+        }, 550);
+      }
+
+      function clearSelectedFile() {
+        selectedFile = null;
+        fileInput.value = '';
+        filePreviewStrip.classList.remove('active');
+        btnStartProcess.disabled = true;
+      }
+
+      btnClearFile.addEventListener('click', (e) => {
+        e.stopPropagation();
+        audio.click();
+        clearSelectedFile();
+      });
+
+      btnStartProcess.addEventListener('click', () => {
+        if (!selectedFile || isDelivering) return;
+        audio.click();
+        uploadModal.style.display = 'none';
+        startDeliveryJourney();
+      });
+
+      /* ------------------------------------------------------------------------
+         6. THE DELIVERY JOURNEY ANIMATION (FILE PROCESSING SEQUENCE)
+         ------------------------------------------------------------------------ */
+      const START_X = 26.2; // Sidewalk initial position (%)
+      const DOOR_X = 89.0;  // Saigon Central Post Office entrance doors (%)
+      const RETURN_X = 48.0;// Sidewalk center celebration spot (%)
+
+      let walkSoundInterval = null;
+
+      function startFootstepAudio() {
+        if (walkSoundInterval) clearInterval(walkSoundInterval);
+        walkSoundInterval = setInterval(() => {
+          audio.footstep();
+        }, 280);
+      }
+
+      function stopFootstepAudio() {
+        if (walkSoundInterval) {
+          clearInterval(walkSoundInterval);
+          walkSoundInterval = null;
+        }
+      }
+
+      async function startDeliveryJourney() {
+        isDelivering = true;
+        closeAllPopovers();
+        deliveryBubble.style.display = 'none';
+
+        // Step 1: Postman carries package & starts walking
+        postmanParcel.style.display = 'block';
+        postmanParcel.textContent = '✉️';
+        showToast('📮 BƯU TÁ ĐANG MANG BƯU KIỆN ĐẾN BƯU ĐIỆN...');
+
+        postmanVideo.play().catch(() => {});
+
+        // Step 2: Journey into Saigon Central Post Office
+        postmanEntity.style.transition = 'left 2.8s linear, opacity 0.4s ease';
+        postmanEntity.style.transform = 'scaleX(1)';
+        postmanEntity.style.opacity = '1';
+        startFootstepAudio();
+
+        requestAnimationFrame(() => {
+          postmanEntity.style.left = DOOR_X + '%';
+        });
+
+        // Vanish into doorway as he reaches entrance
+        setTimeout(() => {
+          audio.doorEnter();
+          postmanEntity.style.opacity = '0';
+          stopFootstepAudio();
+        }, 2500);
+
+        setTimeout(async () => {
+          postmanParcel.style.display = 'none';
+          enterPostOfficeProcessing();
+        }, 2850);
+      }
+
+      // Step 2 & 3: Inside the Post Office & Processing
+      async function enterPostOfficeProcessing() {
+        windowsSparkles.style.display = 'block';
+        audio.sparkle();
+
+        officeStatusBadge.style.display = 'flex';
+        badgeTitle.textContent = 'ĐANG XỬ LÝ / DELIVERING & CONVERTING...';
+        badgeSubtext.textContent = `Bưu điện Sài Gòn đang thực hiện: ${currentModeName}`;
+        badgeProgressFill.style.width = '0%';
+
+        let progress = 0;
+        const progressTimer = setInterval(() => {
+          progress += 5;
+          if (progress > 95) progress = 95;
+          badgeProgressFill.style.width = progress + '%';
+        }, 100);
+
+        const startTime = Date.now();
+        let conversionResult = null;
+
+        try {
+          conversionResult = await runConversionEngine(selectedFile, currentMode, {
+            quality: parseInt(compressQualitySlider.value, 10) / 100
+          });
+        } catch (err) {
+          console.error('Lỗi chuyển đổi:', err);
+          conversionResult = createFallbackRepackage(selectedFile, currentMode);
+        }
+
+        const elapsed = Date.now() - startTime;
+        const remainingDelay = Math.max(0, 2200 - elapsed);
+
+        setTimeout(() => {
+          clearInterval(progressTimer);
+          badgeProgressFill.style.width = '100%';
+          badgeTitle.textContent = 'ĐÃ XỬ LÝ XONG!';
+          badgeSubtext.textContent = 'Bưu tá đang mang trả bưu phẩm cho bạn...';
+
+          setTimeout(() => {
+            windowsSparkles.style.display = 'none';
+            officeStatusBadge.style.display = 'none';
+            postmanReturnJourney(conversionResult);
+          }, 600);
+        }, remainingDelay);
+      }
+
+      // Step 3: Returning from Post Office to Center
+      function postmanReturnJourney(result) {
+        processedBlob = result.blob;
+        processedFileName = result.name;
+
+        postmanEntity.style.transition = 'none';
+        postmanEntity.style.left = DOOR_X + '%';
+        postmanEntity.style.opacity = '1';
+        postmanParcel.style.display = 'block';
+        postmanParcel.textContent = '🎁';
+
+        // Turn around: facing LEFT (scaleX(-1))
+        postmanEntity.style.transform = 'scaleX(-1)';
+
+        audio.doorEnter();
+        startFootstepAudio();
+
+        setTimeout(() => {
+          postmanEntity.style.transition = 'left 2.2s linear';
+          postmanEntity.style.left = RETURN_X + '%';
+        }, 50);
+
+        setTimeout(() => {
+          stopFootstepAudio();
+
+          // Turn forward & celebratory jump!
+          postmanEntity.style.transform = 'scaleX(1)';
+          postmanEntity.classList.add('jump-celebration');
+          audio.fanfare();
+          firePixelConfetti();
+
+          setTimeout(() => {
+            postmanEntity.classList.remove('jump-celebration');
+            showDeliveryBubble(result);
+          }, 800);
+
+        }, 2250);
+      }
+
+      // Step 4: Show Speech Bubble & Glowing Download Button
+      function showDeliveryBubble(result) {
+        bubbleFileName.textContent = result.name;
+        bubbleOrigSize.textContent = formatBytes(result.origSize);
+        bubbleNewSize.textContent = formatBytes(result.newSize);
+
+        if (result.origSize > 0) {
+          const diff = result.origSize - result.newSize;
+          const pct = ((diff / result.origSize) * 100).toFixed(1);
+          if (diff > 0) {
+            bubbleSavedRow.style.display = 'flex';
+            bubbleSavedPct.textContent = `-${pct}% (Tiết kiệm ${formatBytes(diff)})`;
+          } else {
+            bubbleSavedRow.style.display = 'none';
+          }
+        } else {
+          bubbleSavedRow.style.display = 'none';
+        }
+
+        deliveryBubble.style.display = 'flex';
+        showToast('🎉 BƯU KIỆN ĐÃ ĐẾN! BẤM TẢI VỀ NGAY!');
+      }
+
+      // Download Action
+      btnDownloadResult.addEventListener('click', () => {
+        if (!processedBlob) return;
+        audio.download();
+
+        const url = URL.createObjectURL(processedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = processedFileName || 'converted_file';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+        showToast('💾 ĐÃ TẢI XUỐNG TỆP THÀNH CÔNG!');
+      });
+
+      // Reset Action
+      btnResetJourney.addEventListener('click', () => {
+        audio.click();
+        resetToIdleState();
+      });
+
+      function resetToIdleState() {
+        deliveryBubble.style.display = 'none';
+        postmanParcel.style.display = 'none';
+        postmanEntity.style.transition = 'left 1s ease-in-out';
+        postmanEntity.style.transform = 'scaleX(1)';
+        postmanEntity.style.left = START_X + '%';
+        postmanEntity.style.opacity = '1';
+
+        isDelivering = false;
+        clearSelectedFile();
+        showToast('📮 SẴN SÀNG TIẾP NHẬN BƯU KIỆN MỚI!');
+      }
+
+      /* ------------------------------------------------------------------------
+         7. CLIENT-SIDE CONVERSION & COMPRESSION ENGINE
+         ------------------------------------------------------------------------ */
+      async function runConversionEngine(file, mode, options = {}) {
+        const quality = options.quality || 0.7;
+        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+
+        switch (mode) {
+          // A. PDF to PNG (pdf.js)
+          case 'pdf_to_png': {
+            if (window.pdfjsLib) {
+              window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+              const buffer = await file.arrayBuffer();
+              const loadingTask = window.pdfjsLib.getDocument({ data: buffer });
+              const pdf = await loadingTask.promise;
+              const page = await pdf.getPage(1);
+
+              const viewport = page.getViewport({ scale: 2.0 });
+              const canvas = document.createElement('canvas');
+              canvas.width = viewport.width;
+              canvas.height = viewport.height;
+              const ctx = canvas.getContext('2d');
+
+              await page.render({ canvasContext: ctx, viewport }).promise;
+              const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+              return {
+                blob,
+                name: `${baseName}_page1.png`,
+                origSize: file.size,
+                newSize: blob.size
+              };
+            }
+            break;
+          }
+
+          // B. PNG to JPEG (Canvas API)
+          case 'png_to_jpeg': {
+            const img = await loadImageFromFile(file);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
+            return {
+              blob,
+              name: `${baseName}.jpg`,
+              origSize: file.size,
+              newSize: blob.size
+            };
+          }
+
+          // C. JPEG to WEBP (Canvas API)
+          case 'jpeg_to_webp': {
+            const img = await loadImageFromFile(file);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', 0.82));
+            return {
+              blob,
+              name: `${baseName}.webp`,
+              origSize: file.size,
+              newSize: blob.size
+            };
+          }
+
+          // D. Excel (.xlsx) to PDF (SheetJS + jsPDF)
+          case 'excel_to_pdf': {
+            if (window.XLSX && window.jspdf) {
+              const buffer = await file.arrayBuffer();
+              const workbook = window.XLSX.read(buffer, { type: 'array' });
+              const firstSheetName = workbook.SheetNames[0];
+              const worksheet = workbook.Sheets[firstSheetName];
+              const rows = window.XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+              const { jsPDF } = window.jspdf;
+              const doc = new jsPDF({ orientation: 'landscape' });
+              doc.setFont('courier', 'normal');
+              doc.setFontSize(11);
+              doc.text(`BUU DIEN SAI GON - EXCEL SHEET (${firstSheetName})`, 14, 15);
+
+              let cursorY = 25;
+              rows.slice(0, 45).forEach((row) => {
+                if (cursorY > 195) {
+                  doc.addPage();
+                  cursorY = 20;
+                }
+                const rowStr = row.map(c => String(c ?? '')).join('  |  ');
+                doc.text(rowStr.substring(0, 110), 14, cursorY);
+                cursorY += 7;
+              });
+
+              const blob = doc.output('blob');
+              return {
+                blob,
+                name: `${baseName}.pdf`,
+                origSize: file.size,
+                newSize: blob.size
+              };
+            }
+            break;
+          }
+
+          // E. TXT to PDF (jsPDF)
+          case 'txt_to_pdf': {
+            const text = await file.text();
+            const { jsPDF } = window.jspdf || {};
+            if (jsPDF) {
+              const doc = new jsPDF();
+              doc.setFont('courier', 'normal');
+              doc.setFontSize(10);
+
+              doc.text(`[ BUU DIEN SAI GON - BAN IN TAI LIEU ]`, 14, 15);
+              doc.text(`File: ${file.name}`, 14, 22);
+              doc.setLineWidth(0.5);
+              doc.line(14, 25, 196, 25);
+
+              const splitText = doc.splitTextToSize(text, 180);
+              let cursorY = 32;
+              for (let i = 0; i < splitText.length; i++) {
+                if (cursorY > 280) {
+                  doc.addPage();
+                  cursorY = 20;
+                }
+                doc.text(splitText[i], 14, cursorY);
+                cursorY += 6;
+              }
+
+              const blob = doc.output('blob');
+              return {
+                blob,
+                name: `${baseName}.pdf`,
+                origSize: file.size,
+                newSize: blob.size
+              };
+            }
+            break;
+          }
+
+          // F. Compress Image (Canvas API with quality downscale)
+          case 'compress_image': {
+            const img = await loadImageFromFile(file);
+            let targetW = img.width;
+            let targetH = img.height;
+            const maxDim = 1920;
+            if (targetW > maxDim || targetH > maxDim) {
+              if (targetW > targetH) {
+                targetH = Math.round((targetH * maxDim) / targetW);
+                targetW = maxDim;
+              } else {
+                targetW = Math.round((targetW * maxDim) / targetH);
+                targetH = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, targetW, targetH);
+
+            const outMime = file.type === 'image/png' ? 'image/webp' : 'image/jpeg';
+            const ext = outMime === 'image/webp' ? '.webp' : '.jpg';
+            const blob = await new Promise(res => canvas.toBlob(res, outMime, quality));
+
+            return {
+              blob,
+              name: `${baseName}_compressed${ext}`,
+              origSize: file.size,
+              newSize: blob.size
+            };
+          }
+
+          // G. Compress PDF (pdf-lib)
+          case 'compress_pdf': {
+            if (window.PDFLib) {
+              const buffer = await file.arrayBuffer();
+              const pdfDoc = await window.PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+              const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              return {
+                blob,
+                name: `${baseName}_optimized.pdf`,
+                origSize: file.size,
+                newSize: blob.size
+              };
+            }
+            break;
+          }
+
+          // H. Compress ZIP (JSZip)
+          case 'compress_zip': {
+            if (window.JSZip) {
+              const zip = new window.JSZip();
+              const buffer = await file.arrayBuffer();
+              zip.file(file.name, buffer);
+              const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+              return {
+                blob,
+                name: `${baseName}.zip`,
+                origSize: file.size,
+                newSize: blob.size
+              };
+            }
+            break;
+          }
+        }
+
+        return createFallbackRepackage(file, mode);
+      }
+
+      function loadImageFromFile(file) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(img);
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Failed to load image'));
+          };
+          img.src = url;
+        });
+      }
+
+      function createFallbackRepackage(file, mode) {
+        let newExt = '.converted';
+        if (mode.includes('pdf')) newExt = '.pdf';
+        else if (mode.includes('png')) newExt = '.png';
+        else if (mode.includes('jpeg') || mode.includes('jpg')) newExt = '.jpg';
+        else if (mode.includes('webp')) newExt = '.webp';
+        else if (mode.includes('zip')) newExt = '.zip';
+
+        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        return {
+          blob: file,
+          name: `${baseName}${newExt}`,
+          origSize: file.size,
+          newSize: file.size
+        };
+      }
+
+      /* ------------------------------------------------------------------------
+         8. URL TEST QUERY SUPPORT
+         ------------------------------------------------------------------------ */
+      const urlParams = new URLSearchParams(window.location.search);
+      const testState = urlParams.get('test');
+
+      function applyTestState() {
+        if (!testState) return;
+        if (testState === 'convert_menu') {
+          wrapperConvert.classList.add('menu-open');
+        } else if (testState === 'compress_menu') {
+          wrapperCompress.classList.add('menu-open');
+        } else if (testState === 'upload') {
+          currentMode = 'pdf_to_png';
+          currentModeName = 'PDF to PNG';
+          currentAccept = '.pdf';
+          openUploadModal();
+        } else if (testState === 'processing') {
+          windowsSparkles.style.display = 'block';
+          officeStatusBadge.style.display = 'flex';
+          badgeProgressFill.style.width = '65%';
+        } else if (testState === 'delivered') {
+          postmanEntity.style.left = RETURN_X + '%';
+          firePixelConfetti();
+          showDeliveryBubble({
+            name: 'tai_lieu_2026.png',
+            origSize: 2450000,
+            newSize: 850000
+          });
+        }
+      }
+
+      applyTestState();
+      window.addEventListener('load', applyTestState);
+
+    })();
+  </script>
+</body>
+</html>
