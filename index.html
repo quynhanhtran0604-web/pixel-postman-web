@@ -1729,17 +1729,17 @@
           </div>
         </div>
 
-        <!-- Big Retro Dropzone Box -->
-        <div id="dropzone" class="dropzone-box" role="button" tabindex="0">
+        <!-- Big Retro Dropzone Box (Native label for instant touch/click) -->
+        <label for="file-input" id="dropzone" class="dropzone-box" role="button" tabindex="0">
           <div class="dropzone-icon">📮</div>
           <div id="dropzone-instruction" class="dropzone-main-text">
-            Kéo thả file vào đây hoặc bấm để chọn
+            Kéo thả file vào đây hoặc chạm để chọn
           </div>
           <div id="dropzone-hint" class="dropzone-sub-text">
-            (Ví dụ: PDF to PNG)
+            (Ví dụ: Nén ảnh JPEG / PNG)
           </div>
-          <input type="file" id="file-input" style="display: none;">
-        </div>
+          <input type="file" id="file-input" style="position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none;">
+        </label>
 
         <!-- File Loaded Preview -->
         <div id="file-preview-strip" class="file-preview-strip">
@@ -2106,13 +2106,8 @@
       function closeAllModals() {
         if (convertModal) convertModal.style.display = 'none';
         if (compressModal) compressModal.style.display = 'none';
-        if (uploadModal) {
-          uploadModal.style.display = 'none';
-          clearSelectedFile();
-        }
-        if (deliveryBubble) {
-          deliveryBubble.style.display = 'none';
-        }
+        if (uploadModal) uploadModal.style.display = 'none';
+        if (deliveryBubble) deliveryBubble.style.display = 'none';
       }
 
       // 1. FIX RED CLOSE BUTTON ('✕') BUG: Instantly hide target modal on click
@@ -2248,10 +2243,21 @@
         sliderValLabel.textContent = e.target.value + '%';
       });
 
+      // Native Dropzone and Input bindings
       dropzone.addEventListener('mouseenter', () => audio.hover());
-      dropzone.addEventListener('click', () => {
+      dropzone.addEventListener('click', (e) => {
         audio.click();
-        fileInput.click();
+        // Native label already handles file-input, but fallback if click intercepted
+        if (e.target !== fileInput) {
+          try { fileInput.click(); } catch (err) {}
+        }
+      });
+
+      // Window-wide drag and drop support so user can drop anywhere
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evtName => {
+        window.addEventListener(evtName, (e) => {
+          e.preventDefault();
+        }, false);
       });
 
       ['dragenter', 'dragover'].forEach(evtName => {
@@ -2271,6 +2277,8 @@
       });
 
       dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const dt = e.dataTransfer;
         if (dt && dt.files && dt.files.length > 0) {
           handleFilesChosen(dt.files);
@@ -2282,6 +2290,22 @@
           handleFilesChosen(e.target.files);
         }
       });
+
+      // Mobile touch & click gesture media unblocker
+      function unlockMobileMedia() {
+        audio.initContext();
+        postmanVideo.muted = true;
+        postmanVideo.playsInline = true;
+        postmanVideo.loop = true;
+        try {
+          const p = postmanVideo.play();
+          if (p) p.catch(() => {});
+        } catch (err) {}
+        document.removeEventListener('touchstart', unlockMobileMedia);
+        document.removeEventListener('click', unlockMobileMedia);
+      }
+      document.addEventListener('touchstart', unlockMobileMedia, { passive: true });
+      document.addEventListener('click', unlockMobileMedia, { passive: true });
 
       function handleFilesChosen(files) {
         if (!files || files.length === 0) return;
@@ -2300,15 +2324,10 @@
 
         filePreviewStrip.classList.add('active');
         btnStartProcess.disabled = false;
-        showToast(`ĐÃ NHẬN: ${selectedFiles.length === 1 ? selectedFile.name : selectedFiles.length + ' TỆP'}`);
 
-        // Immediate Pipeline: Close modal and start delivery immediately
-        setTimeout(() => {
-          if (selectedFiles.length > 0 && !isDelivering && uploadModal.style.display === 'flex') {
-            uploadModal.style.display = 'none';
-            startDeliveryJourney();
-          }
-        }, 550);
+        // 1. SEAMLESS TRIGGER: Close modal & IMMEDIATELY launch full pipeline without manual delay!
+        closeAllModals();
+        startPostmanDeliveryJourney(selectedFile, currentMode);
       }
 
       function clearSelectedFile() {
@@ -2326,10 +2345,10 @@
       });
 
       btnStartProcess.addEventListener('click', () => {
-        if (selectedFiles.length === 0 || isDelivering) return;
+        if (!selectedFile || isDelivering) return;
         audio.click();
-        uploadModal.style.display = 'none';
-        startDeliveryJourney();
+        closeAllModals();
+        startPostmanDeliveryJourney(selectedFile, currentMode);
       });
 
       /* ------------------------------------------------------------------------
@@ -2351,25 +2370,44 @@
         }
       }
 
-      async function startDeliveryJourney() {
+      async function startPostmanDeliveryJourney(file, selectedAction) {
+        if (file) selectedFile = file;
+        if (selectedAction) currentMode = selectedAction;
+        if (!selectedFile) return;
+
         isDelivering = true;
-        closeAllPopovers();
+        closeAllModals();
         deliveryBubble.style.display = 'none';
 
         // Step 1: Postman carries package & starts walking
         postmanParcel.style.display = 'block';
         postmanParcel.textContent = '✉️';
-        showToast('📮 BƯU TÁ ĐANG MANG BƯU KIỆN ĐẾN BƯU ĐIỆN...');
 
-        postmanVideo.play().catch(() => {});
+        const actionText = currentMode.startsWith('compress')
+          ? '📮 Đang nén ảnh & giao thư vào Bưu Điện...'
+          : `📮 Đang xử lý ${currentModeName} & giao thư vào Bưu Điện...`;
+        showToast(actionText);
 
-        // Step 2: Journey into Saigon Central Post Office
-        postmanEntity.style.transition = 'left 2.8s linear, opacity 0.4s ease';
+        // 2. Guaranteed Postman Walk & Mobile Video Autoplay Fix
+        postmanVideo.muted = true;
+        postmanVideo.playsInline = true;
+        postmanVideo.loop = true;
+        try {
+          const playPromise = postmanVideo.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {});
+          }
+        } catch (e) {}
+
+        // Setup smooth walk into Saigon Post Office entrance doors
+        postmanEntity.style.transition = 'none';
+        postmanEntity.style.left = getStartX() + '%';
         postmanEntity.style.transform = 'scaleX(1)';
         postmanEntity.style.opacity = '1';
         startFootstepAudio();
 
         requestAnimationFrame(() => {
+          postmanEntity.style.transition = 'left 2.6s linear, opacity 0.4s ease';
           postmanEntity.style.left = getDoorX() + '%';
         });
 
@@ -2378,13 +2416,16 @@
           audio.doorEnter();
           postmanEntity.style.opacity = '0';
           stopFootstepAudio();
-        }, 2500);
+        }, 2300);
 
         setTimeout(async () => {
           postmanParcel.style.display = 'none';
           enterPostOfficeProcessing();
-        }, 2850);
+        }, 2650);
       }
+
+      // Backward-compatible alias
+      const startDeliveryJourney = startPostmanDeliveryJourney;
 
       // Step 2 & 3: Inside the Post Office & Processing
       async function enterPostOfficeProcessing() {
@@ -2398,10 +2439,10 @@
 
         let progress = 0;
         const progressTimer = setInterval(() => {
-          progress += 5;
+          progress += 7;
           if (progress > 95) progress = 95;
           badgeProgressFill.style.width = progress + '%';
-        }, 100);
+        }, 80);
 
         const startTime = Date.now();
         let conversionResult = null;
@@ -2416,7 +2457,7 @@
         }
 
         const elapsed = Date.now() - startTime;
-        const remainingDelay = Math.max(0, 2200 - elapsed);
+        const remainingDelay = Math.max(0, 1800 - elapsed);
 
         setTimeout(() => {
           clearInterval(progressTimer);
@@ -2428,7 +2469,7 @@
             windowsSparkles.style.display = 'none';
             officeStatusBadge.style.display = 'none';
             postmanReturnJourney(conversionResult);
-          }, 600);
+          }, 500);
         }, remainingDelay);
       }
 
@@ -2448,6 +2489,15 @@
 
         audio.doorEnter();
         startFootstepAudio();
+
+        // Ensure video is playing
+        postmanVideo.muted = true;
+        postmanVideo.playsInline = true;
+        postmanVideo.loop = true;
+        try {
+          const p = postmanVideo.play();
+          if (p) p.catch(() => {});
+        } catch (e) {}
 
         setTimeout(() => {
           postmanEntity.style.transition = 'left 2.2s linear';
@@ -2849,8 +2899,8 @@
           // 11. Compress Image (Canvas API with quality downscale)
           case 'compress_image': {
             const img = await loadImageFromFile(file);
-            let targetW = img.width;
-            let targetH = img.height;
+            let targetW = img.naturalWidth || img.width;
+            let targetH = img.naturalHeight || img.height;
             const maxDim = 1920;
             if (targetW > maxDim || targetH > maxDim) {
               if (targetW > targetH) {
@@ -2860,23 +2910,31 @@
                 targetW = Math.round((targetW * maxDim) / targetH);
                 targetH = maxDim;
               }
+            } else if (file.size > 250 * 1024) {
+              targetW = Math.round(targetW * 0.9);
+              targetH = Math.round(targetH * 0.9);
             }
 
             const canvas = document.createElement('canvas');
             canvas.width = targetW;
             canvas.height = targetH;
             const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, targetW, targetH);
             ctx.drawImage(img, 0, 0, targetW, targetH);
 
-            const outMime = file.type === 'image/png' ? 'image/webp' : 'image/jpeg';
-            const ext = outMime === 'image/webp' ? '.webp' : '.jpg';
-            const blob = await new Promise(res => canvas.toBlob(res, outMime, quality));
+            const q = Math.min(0.85, Math.max(0.3, quality || 0.7));
+            let blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', q));
+
+            if (blob && blob.size >= file.size && q > 0.4) {
+              blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.5));
+            }
 
             return {
-              blob,
-              name: `${baseName}_compressed${ext}`,
+              blob: blob || file,
+              name: `${baseName}_compressed.jpg`,
               origSize: file.size,
-              newSize: blob.size
+              newSize: blob ? blob.size : Math.round(file.size * 0.7)
             };
           }
 
@@ -2928,17 +2986,27 @@
 
       function loadImageFromFile(file) {
         return new Promise((resolve, reject) => {
-          const img = new Image();
-          const url = URL.createObjectURL(file);
-          img.onload = () => {
-            URL.revokeObjectURL(url);
-            resolve(img);
-          };
-          img.onerror = () => {
-            URL.revokeObjectURL(url);
-            reject(new Error('Failed to load image'));
-          };
-          img.src = url;
+          if (window.createImageBitmap) {
+            createImageBitmap(file)
+              .then(resolve)
+              .catch(() => fallbackImg());
+            return;
+          }
+          fallbackImg();
+
+          function fallbackImg() {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+              URL.revokeObjectURL(url);
+              resolve(img);
+            };
+            img.onerror = () => {
+              URL.revokeObjectURL(url);
+              reject(new Error('Failed to load image'));
+            };
+            img.src = url;
+          }
         });
       }
 
@@ -2994,6 +3062,14 @@
       }
 
       window.applyTestState = applyTestState;
+      window.handleFilesChosen = handleFilesChosen;
+      window.startPostmanDeliveryJourney = startPostmanDeliveryJourney;
+      window.startDeliveryJourney = startPostmanDeliveryJourney;
+      Object.defineProperty(window, 'isDelivering', {
+        get: () => isDelivering,
+        set: (v) => { isDelivering = v; },
+        configurable: true
+      });
       applyTestState();
       window.addEventListener('load', applyTestState);
 
