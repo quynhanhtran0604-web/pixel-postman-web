@@ -302,56 +302,155 @@
     }
 
     /* ==========================================================================
-       POPOVER / DROPDOWN MENUS (RIGHT NEXT TO THE BUTTONS)
+       RETRO MODAL BACKDROPS & CATEGORIZED MODALS
        ========================================================================== */
-    .retro-dropdown-menu {
-      position: absolute;
-      left: calc(100% + 14px);
-      top: -4px;
-      width: 320px;
+    .retro-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(2px);
+      z-index: 100000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto !important;
+      padding: 14px;
+      animation: backdropFadeIn 0.15s ease;
+    }
+
+    @keyframes backdropFadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    .retro-modal-card {
+      width: 580px;
+      max-width: 92vw;
+      max-height: 85vh;
       background: var(--color-cream);
       border: 4px solid #000;
       box-shadow: var(--shadow-pixel-xl);
-      display: none;
-      flex-direction: column;
-      z-index: 100000;
-      pointer-events: auto !important;
-      animation: popoverFadeIn 0.16s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-    }
-
-    /* Invisible hover-bridge preventing accidental close between button and menu */
-    .retro-dropdown-menu::before {
-      content: '';
-      position: absolute;
-      top: -12px;
-      bottom: -12px;
-      left: -24px;
-      width: 28px;
-      background: transparent;
-    }
-
-    .retro-btn-wrapper:hover .retro-dropdown-menu,
-    .retro-btn-wrapper.menu-open .retro-dropdown-menu {
       display: flex;
+      flex-direction: column;
+      animation: popoverFadeIn 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: auto !important;
+      overflow: hidden;
     }
 
-    @keyframes popoverFadeIn {
-      0% { opacity: 0; transform: scale(0.92) translateX(-8px); }
-      100% { opacity: 1; transform: scale(1) translateX(0); }
-    }
-
-    .dropdown-header {
-      background: #2b3a4a;
-      color: var(--color-gold);
-      padding: 10px 14px;
-      font-family: var(--pixel-font-vn);
-      font-size: 14px;
-      font-weight: 700;
-      border-bottom: 3px solid #000;
+    .retro-modal-header {
+      background: #1b4d3e;
+      color: #fff;
+      padding: 12px 16px;
+      border-bottom: 4px solid #000;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .retro-modal-header h2 {
+      font-family: var(--pixel-font-vn);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-gold);
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Category Tabs Bar */
+    .category-tabs-bar {
+      display: flex;
+      background: #ded7c5;
+      border-bottom: 3px solid #000;
+      padding: 8px 12px 0;
+      gap: 8px;
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .category-tab-btn {
+      background: #c9c0aa;
+      color: #222;
+      border: 3px solid #000;
+      border-bottom: none;
+      padding: 8px 14px;
+      font-family: var(--pixel-font-vn);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      transition: all 0.1s ease;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .category-tab-btn:hover {
+      background: var(--color-gold-hover);
+      color: #000;
+    }
+
+    .category-tab-btn.active {
+      background: var(--color-cream);
+      color: #000;
+      border-bottom: 3px solid var(--color-cream);
+      margin-bottom: -3px;
+      font-weight: 800;
+      box-shadow: 0 -2px 0 #000;
+    }
+
+    .category-tab-panel {
+      display: none;
+      padding: 14px;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      max-height: calc(85vh - 130px);
+    }
+
+    .category-tab-panel.active {
+      display: flex;
+    }
+
+    /* Universal Red '✕' Close Button */
+    .retro-close-btn, .modal-close-btn, .dropdown-close-btn {
+      background: var(--color-red-post) !important;
+      color: #ffffff !important;
+      border: 3px solid #000 !important;
+      width: 32px !important;
+      height: 32px !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-family: var(--pixel-font-latin) !important;
+      font-size: 16px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      z-index: 100000 !important;
+      box-shadow: 2px 2px 0 #000 !important;
+      transition: transform 0.08s, background 0.08s, box-shadow 0.08s !important;
+      user-select: none !important;
+      border-radius: 2px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      text-decoration: none !important;
+    }
+
+    .retro-close-btn:hover, .modal-close-btn:hover, .dropdown-close-btn:hover {
+      background: #ff3333 !important;
+      transform: translate(-1px, -1px) !important;
+      box-shadow: 3px 3px 0 #000 !important;
+    }
+
+    .retro-close-btn:active, .modal-close-btn:active, .dropdown-close-btn:active {
+      transform: translate(2px, 2px) !important;
+      box-shadow: none !important;
     }
 
     .dropdown-body {
@@ -890,6 +989,7 @@
       color: #1b4d3e;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
 
@@ -1083,44 +1183,42 @@
         display: none !important;
       }
 
-      /* Clean Retro Pixel Bottom-Sheet Dropdown */
-      .retro-dropdown-menu {
-        position: fixed !important;
-        left: 50% !important;
-        bottom: calc(74px + env(safe-area-inset-bottom, 0px)) !important;
-        top: auto !important;
-        transform: translateX(-50%) !important;
-        width: calc(100vw - 20px) !important;
-        max-width: 390px !important;
-        max-height: 65vh !important;
-        border: 3px solid #000 !important;
-        box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.65), 5px 5px 0 #000 !important;
-        animation: mobileSheetSlide 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) !important;
-        z-index: 100000 !important;
+      /* Responsive Modals on Mobile */
+      .retro-modal-backdrop, #upload-modal {
+        padding: 10px !important;
       }
 
-      .retro-dropdown-menu::before {
-        display: none !important;
+      .retro-modal-card, .upload-card {
+        width: 92vw !important;
+        max-width: 400px !important;
+        max-height: 85vh !important;
+        border-width: 3px !important;
+        box-shadow: 6px 6px 0 #000 !important;
       }
 
-      .retro-btn-wrapper.menu-open .retro-dropdown-menu {
-        display: flex !important;
-      }
-
-      @keyframes mobileSheetSlide {
-        0% { opacity: 0; transform: translate(-50%, 16px); }
-        100% { opacity: 1; transform: translate(-50%, 0); }
-      }
-
-      .dropdown-header {
+      .retro-modal-header, .upload-card-header {
         padding: 10px 14px !important;
-        font-size: 13px !important;
       }
 
-      .dropdown-body {
-        padding: 8px !important;
-        gap: 6px !important;
-        max-height: calc(65vh - 44px) !important;
+      .retro-modal-header h2, .upload-card-header h2 {
+        font-size: 14px !important;
+      }
+
+      .category-tabs-bar {
+        padding: 6px 8px 0 !important;
+        gap: 4px !important;
+      }
+
+      .category-tab-btn {
+        padding: 7px 10px !important;
+        font-size: 13px !important;
+        min-height: 44px !important;
+      }
+
+      .category-tab-panel, .upload-card-body {
+        padding: 12px 10px !important;
+        gap: 8px !important;
+        max-height: calc(85vh - 110px) !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
       }
@@ -1369,8 +1467,11 @@
       <!-- Cheerful Delivery Speech Bubble & Download Action -->
       <div id="delivery-bubble">
         <div class="bubble-title">
-          <span>📬</span>
-          <span>BƯU TÁ SÀI GÒN:</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>📬</span>
+            <span>BƯU TÁ SÀI GÒN:</span>
+          </div>
+          <button class="retro-close-btn bubble-close-btn" id="btn-close-bubble" data-close="delivery-bubble" type="button" aria-label="Đóng">&times;</button>
         </div>
         <div style="font-family: var(--pixel-font-vn); font-size: 16px; font-weight: 700; color: #000; line-height: 1.4;">
           "Bưu kiện của bạn đã xử lý xong!"
@@ -1435,51 +1536,6 @@
         </div>
         <span class="btn-arrow-indicator">▶</span>
       </button>
-
-      <!-- Sleek Pixel Dropdown Menu for Convert file -->
-      <div class="retro-dropdown-menu" id="dropdown-convert">
-        <div class="dropdown-header">
-          <span>⚡ CHỌN ĐỊNH DẠNG</span>
-          <button type="button" class="dropdown-close-btn" data-close="wrapper-convert" title="Đóng">&times;</button>
-        </div>
-        <div class="dropdown-body">
-          <button class="dropdown-item-btn" data-mode="pdf_to_png" data-name="PDF to PNG" data-accept=".pdf">
-            <span class="d-icon">📑</span>
-            <div class="d-text">
-              <div class="d-title">PDF to PNG</div>
-              <div class="d-desc">Trích xuất trang PDF thành ảnh PNG nét chuẩn</div>
-            </div>
-          </button>
-          <button class="dropdown-item-btn" data-mode="png_to_jpeg" data-name="PNG to JPEG" data-accept=".png,.webp">
-            <span class="d-icon">🖼️</span>
-            <div class="d-text">
-              <div class="d-title">PNG to JPEG</div>
-              <div class="d-desc">Chuyển ảnh PNG sang JPEG gọn nhẹ hơn</div>
-            </div>
-          </button>
-          <button class="dropdown-item-btn" data-mode="jpeg_to_webp" data-name="JPEG to WEBP" data-accept=".jpg,.jpeg,.png">
-            <span class="d-icon">🌐</span>
-            <div class="d-text">
-              <div class="d-title">JPEG to WEBP</div>
-              <div class="d-desc">Nén sang định dạng ảnh thế hệ mới</div>
-            </div>
-          </button>
-          <button class="dropdown-item-btn" data-mode="excel_to_pdf" data-name="Excel (.xlsx) to PDF" data-accept=".xlsx,.xls">
-            <span class="d-icon">📊</span>
-            <div class="d-text">
-              <div class="d-title">Excel (.xlsx) to PDF</div>
-              <div class="d-desc">Chuyển bảng tính XLSX sang tài liệu PDF</div>
-            </div>
-          </button>
-          <button class="dropdown-item-btn" data-mode="txt_to_pdf" data-name="TXT to PDF" data-accept=".txt,.md">
-            <span class="d-icon">📄</span>
-            <div class="d-text">
-              <div class="d-title">TXT to PDF</div>
-              <div class="d-desc">Đóng gói văn bản thuần sang tài liệu PDF</div>
-            </div>
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Button 2: Compress file (Blue/Chunky retro border) -->
@@ -1492,45 +1548,157 @@
         </div>
         <span class="btn-arrow-indicator">▶</span>
       </button>
-
-      <!-- Sleek Pixel Dropdown Menu for Compress file -->
-      <div class="retro-dropdown-menu" id="dropdown-compress">
-        <div class="dropdown-header">
-          <span>🗜️ TÙY CHỌN NÉN</span>
-          <button type="button" class="dropdown-close-btn" data-close="wrapper-compress" title="Đóng">&times;</button>
-        </div>
-        <div class="dropdown-body">
-          <button class="dropdown-item-btn" data-mode="compress_image" data-name="Nén ảnh (PNG / JPEG)" data-accept=".jpg,.jpeg,.png,.webp">
-            <span class="d-icon">🖼️</span>
-            <div class="d-text">
-              <div class="d-title">Nén ảnh (PNG / JPEG)</div>
-              <div class="d-desc">Tối ưu dung lượng hình ảnh với chất lượng tùy chỉnh</div>
-            </div>
-          </button>
-          <button class="dropdown-item-btn" data-mode="compress_pdf" data-name="Nén file PDF" data-accept=".pdf">
-            <span class="d-icon">📑</span>
-            <div class="d-text">
-              <div class="d-title">Nén file PDF</div>
-              <div class="d-desc">Tối ưu hóa và nén luồng dữ liệu PDF client-side</div>
-            </div>
-          </button>
-          <button class="dropdown-item-btn" data-mode="compress_zip" data-name="Nén File Vào ZIP" data-accept="*/*">
-            <span class="d-icon">📦</span>
-            <div class="d-text">
-              <div class="d-title">Nén File Vào ZIP</div>
-              <div class="d-desc">Đóng gói và nén mọi loại tệp thành file .zip</div>
-            </div>
-          </button>
-        </div>
-      </div>
     </div>
 
   </div>
 
+  <!-- ==========================================================================
+       CONVERT FILE MODAL (CATEGORIZED TABS)
+       ========================================================================== -->
+  <div id="convert-modal" class="retro-modal-backdrop">
+    <div class="retro-modal-card">
+      <div class="retro-modal-header" style="background: #1b4d3e;">
+        <h2>
+          <span>⚡</span>
+          <span>CHUYỂN ĐỔI TỆP (CONVERT FILE)</span>
+        </h2>
+        <button class="retro-close-btn" data-close="convert-modal" type="button" aria-label="Đóng">&times;</button>
+      </div>
+
+      <!-- Category Tabs Bar -->
+      <div class="category-tabs-bar">
+        <button class="category-tab-btn active" data-tab="tab-documents" type="button">📁 Documents</button>
+        <button class="category-tab-btn" data-tab="tab-images" type="button">🖼️ Images</button>
+        <button class="category-tab-btn" data-tab="tab-data" type="button">📊 Data</button>
+      </div>
+
+      <!-- Category 1: Documents -->
+      <div id="tab-documents" class="category-tab-panel active">
+        <button class="dropdown-item-btn" data-mode="pdf_to_png" data-name="PDF to PNG / JPG" data-accept=".pdf" type="button">
+          <span class="d-icon">📑</span>
+          <div class="d-text">
+            <div class="d-title">PDF to PNG / JPG</div>
+            <div class="d-desc">Trích xuất trang PDF nét chuẩn sang ảnh PNG hoặc JPG</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="excel_to_pdf" data-name="Excel (.xlsx) to PDF" data-accept=".xlsx,.xls" type="button">
+          <span class="d-icon">📊</span>
+          <div class="d-text">
+            <div class="d-title">Excel (.xlsx) to PDF</div>
+            <div class="d-desc">Chuyển đổi bảng tính Excel sang tài liệu PDF hoàn chỉnh</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="txt_to_pdf" data-name="TXT / Markdown to PDF" data-accept=".txt,.md" type="button">
+          <span class="d-icon">📝</span>
+          <div class="d-text">
+            <div class="d-title">TXT / Markdown to PDF</div>
+            <div class="d-desc">Đóng gói văn bản thuần và ghi chú Markdown sang file PDF</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="word_to_pdf" data-name="Word (.docx) to PDF" data-accept=".docx" type="button">
+          <span class="d-icon">📄</span>
+          <div class="d-text">
+            <div class="d-title">Word (.docx) to PDF</div>
+            <div class="d-desc">Trích xuất nội dung văn bản Word DOCX sang tài liệu PDF</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Category 2: Images -->
+      <div id="tab-images" class="category-tab-panel">
+        <button class="dropdown-item-btn" data-mode="png_to_jpeg" data-name="PNG to JPEG" data-accept=".png,.webp" type="button">
+          <span class="d-icon">🖼️</span>
+          <div class="d-text">
+            <div class="d-title">PNG to JPEG</div>
+            <div class="d-desc">Chuyển ảnh PNG sang JPEG gọn nhẹ hơn cho web</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="jpeg_to_png" data-name="JPEG to PNG" data-accept=".jpg,.jpeg,.webp" type="button">
+          <span class="d-icon">🎨</span>
+          <div class="d-text">
+            <div class="d-title">JPEG to PNG</div>
+            <div class="d-desc">Chuyển ảnh JPEG sang định dạng PNG chất lượng cao</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="image_to_webp" data-name="Image to WEBP" data-accept=".jpg,.jpeg,.png" type="button">
+          <span class="d-icon">🌐</span>
+          <div class="d-text">
+            <div class="d-title">Image to WEBP</div>
+            <div class="d-desc">Nén và chuyển đổi sang chuẩn ảnh WEBP thế hệ mới</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="image_to_pdf" data-name="Multi-Image to PDF" data-accept=".jpg,.jpeg,.png,.webp" data-multiple="true" type="button">
+          <span class="d-icon">📚</span>
+          <div class="d-text">
+            <div class="d-title">Multi-Image to PDF</div>
+            <div class="d-desc">Ghép một hoặc nhiều ảnh thành 1 file tài liệu PDF duy nhất</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Category 3: Data -->
+      <div id="tab-data" class="category-tab-panel">
+        <button class="dropdown-item-btn" data-mode="json_to_csv" data-name="JSON to CSV" data-accept=".json" type="button">
+          <span class="d-icon">🔄</span>
+          <div class="d-text">
+            <div class="d-title">JSON to CSV</div>
+            <div class="d-desc">Chuyển đổi dữ liệu đối tượng JSON sang bảng tính CSV</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="csv_to_json" data-name="CSV to JSON" data-accept=".csv" type="button">
+          <span class="d-icon">🗂️</span>
+          <div class="d-text">
+            <div class="d-title">CSV to JSON</div>
+            <div class="d-desc">Chuyển đổi bảng tính CSV sang cấu trúc mảng JSON chuẩn</div>
+          </div>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       COMPRESS FILE MODAL (CATEGORIZED OPTIONS)
+       ========================================================================== -->
+  <div id="compress-modal" class="retro-modal-backdrop">
+    <div class="retro-modal-card">
+      <div class="retro-modal-header" style="background: #1f6fd2;">
+        <h2>
+          <span>🗜️</span>
+          <span>NÉN GIẢM DUNG LƯỢNG (COMPRESS)</span>
+        </h2>
+        <button class="retro-close-btn" data-close="compress-modal" type="button" aria-label="Đóng">&times;</button>
+      </div>
+
+      <div class="retro-modal-body" style="padding: 14px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: calc(85vh - 70px);">
+        <button class="dropdown-item-btn" data-mode="compress_image" data-name="Nén ảnh (JPEG / PNG / WebP)" data-accept=".jpg,.jpeg,.png,.webp" type="button">
+          <span class="d-icon">🖼️</span>
+          <div class="d-text">
+            <div class="d-title">Nén ảnh (JPEG / PNG / WebP)</div>
+            <div class="d-desc">Tối ưu dung lượng ảnh với thanh trượt điều chỉnh chất lượng trực quan</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="compress_pdf" data-name="Nén file PDF" data-accept=".pdf" type="button">
+          <span class="d-icon">📄</span>
+          <div class="d-text">
+            <div class="d-title">Nén file PDF</div>
+            <div class="d-desc">Tối ưu hóa và nén luồng dữ liệu PDF trực tiếp trên trình duyệt</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="compress_zip" data-name="Nén nhiều tệp vào ZIP" data-accept="*/*" data-multiple="true" type="button">
+          <span class="d-icon">📦</span>
+          <div class="d-text">
+            <div class="d-title">Nén nhiều tệp vào ZIP</div>
+            <div class="d-desc">Đóng gói và nén một hoặc nhiều tệp vào file .zip bằng JSZip</div>
+          </div>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Confetti Canvas -->
   <canvas id="confetti-canvas"></canvas>
-
-
 
   <!-- ==========================================================================
        CENTERED DRAG & DROP UPLOAD ZONE MODAL
@@ -1539,7 +1707,7 @@
     <div class="upload-card">
       <div class="upload-card-header">
         <h2 id="modal-title">TRẠM TIẾP NHẬN BƯU KIỆN</h2>
-        <button class="modal-close-btn" id="btn-close-upload" type="button">&times;</button>
+        <button class="retro-close-btn" id="btn-close-upload" data-close="upload-modal" type="button" aria-label="Đóng">&times;</button>
       </div>
       <div class="upload-card-body">
         
@@ -1854,14 +2022,12 @@
       }
 
       /* ------------------------------------------------------------------------
-         5. FIXED RETRO BUTTONS & POPOVER MENUS CONTROLLER
+         5. FIXED RETRO BUTTONS, CATEGORIZED MODALS & CONTROLLER
          ------------------------------------------------------------------------ */
-      const wrapperConvert = document.getElementById('wrapper-convert');
-      const wrapperCompress = document.getElementById('wrapper-compress');
       const btnMainConvert = document.getElementById('main-btn-convert');
       const btnMainCompress = document.getElementById('main-btn-compress');
-      const dropdownConvert = document.getElementById('dropdown-convert');
-      const dropdownCompress = document.getElementById('dropdown-compress');
+      const convertModal = document.getElementById('convert-modal');
+      const compressModal = document.getElementById('compress-modal');
 
       const uploadModal = document.getElementById('upload-modal');
       const modalTitle = document.getElementById('modal-title');
@@ -1899,8 +2065,10 @@
       const btnResetJourney = document.getElementById('btn-reset-journey');
 
       let currentMode = 'pdf_to_png';
-      let currentModeName = 'PDF to PNG';
+      let currentModeName = 'PDF to PNG / JPG';
       let currentAccept = '.pdf';
+      let isMultipleFiles = false;
+      let selectedFiles = [];
       let selectedFile = null;
       let processedBlob = null;
       let processedFileName = '';
@@ -1923,47 +2091,107 @@
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
       }
 
-      function closeAllPopovers() {
-        wrapperConvert.classList.remove('menu-open');
-        wrapperCompress.classList.remove('menu-open');
+      // Universal Modal Closer & Reset Logic
+      function closeModal(modal) {
+        if (!modal) return;
+        modal.style.display = 'none';
+        if (modal === uploadModal) {
+          clearSelectedFile();
+        }
+        if (modal === deliveryBubble) {
+          resetToIdleState();
+        }
       }
 
-      // Convert Button: Click & Hover
-      wrapperConvert.addEventListener('mouseenter', () => audio.hover());
+      function closeAllModals() {
+        if (convertModal) convertModal.style.display = 'none';
+        if (compressModal) compressModal.style.display = 'none';
+        if (uploadModal) {
+          uploadModal.style.display = 'none';
+          clearSelectedFile();
+        }
+        if (deliveryBubble) {
+          deliveryBubble.style.display = 'none';
+        }
+      }
+
+      // 1. FIX RED CLOSE BUTTON ('✕') BUG: Instantly hide target modal on click
+      document.querySelectorAll('.retro-close-btn, [data-close]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          audio.click();
+          const targetId = btn.getAttribute('data-close');
+          if (targetId) {
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) closeModal(targetEl);
+          } else {
+            const parentModal = btn.closest('.retro-modal-backdrop, #upload-modal, #delivery-bubble');
+            if (parentModal) closeModal(parentModal);
+          }
+        });
+      });
+
+      // 2. Click outside backdrop to close
+      [convertModal, compressModal, uploadModal].forEach(modal => {
+        if (!modal) return;
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            audio.click();
+            closeModal(modal);
+          }
+        });
+      });
+
+      // 3. Press Escape key to close any modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+          closeAllModals();
+        }
+      });
+
+      // Primary Buttons: Open respective categorized modal
       btnMainConvert.addEventListener('click', (e) => {
         e.stopPropagation();
         audio.click();
-        const isOpen = wrapperConvert.classList.contains('menu-open');
-        closeAllPopovers();
+        const isOpen = convertModal.style.display === 'flex';
+        closeAllModals();
         if (!isOpen) {
-          wrapperConvert.classList.add('menu-open');
+          convertModal.style.display = 'flex';
         }
       });
+      btnMainConvert.addEventListener('mouseenter', () => audio.hover());
 
-      // Compress Button: Click & Hover
-      wrapperCompress.addEventListener('mouseenter', () => audio.hover());
       btnMainCompress.addEventListener('click', (e) => {
         e.stopPropagation();
         audio.click();
-        const isOpen = wrapperCompress.classList.contains('menu-open');
-        closeAllPopovers();
+        const isOpen = compressModal.style.display === 'flex';
+        closeAllModals();
         if (!isOpen) {
-          wrapperCompress.classList.add('menu-open');
+          compressModal.style.display = 'flex';
         }
       });
+      btnMainCompress.addEventListener('mouseenter', () => audio.hover());
 
-      // Outside click / touch closes popovers
-      document.addEventListener('click', (e) => {
-        if (!wrapperConvert.contains(e.target) && !wrapperCompress.contains(e.target)) {
-          closeAllPopovers();
-        }
-      });
+      // Category Tabs inside Convert Modal
+      const categoryTabBtns = document.querySelectorAll('.category-tab-btn');
+      const categoryPanels = document.querySelectorAll('.category-tab-panel');
 
-      document.querySelectorAll('.dropdown-close-btn').forEach(btn => {
+      categoryTabBtns.forEach(btn => {
+        btn.addEventListener('mouseenter', () => audio.hover());
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           audio.click();
-          closeAllPopovers();
+          const targetTab = btn.getAttribute('data-tab');
+          categoryTabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          categoryPanels.forEach(p => {
+            if (p.id === targetTab) {
+              p.classList.add('active');
+            } else {
+              p.classList.remove('active');
+            }
+          });
         });
       });
 
@@ -1980,35 +2208,33 @@
         showToast('BẤM VÀO 2 NÚT BÊN TRÁI ĐỂ CHỌN CHUYỂN ĐỔI HOẶC NÉN TỆP!');
       });
 
-      // Dropdown Item Selection
-      function setupDropdownOptions(container) {
-        container.querySelectorAll('.dropdown-item-btn').forEach(btn => {
-          btn.addEventListener('mouseenter', () => audio.hover());
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            audio.click();
-            currentMode = btn.getAttribute('data-mode');
-            currentModeName = btn.getAttribute('data-name');
-            currentAccept = btn.getAttribute('data-accept');
+      // Option item selection across both modals
+      document.querySelectorAll('.dropdown-item-btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => audio.hover());
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          audio.click();
+          currentMode = btn.getAttribute('data-mode') || 'pdf_to_png';
+          currentModeName = btn.getAttribute('data-name') || 'PDF to PNG / JPG';
+          currentAccept = btn.getAttribute('data-accept') || '*/*';
+          isMultipleFiles = btn.getAttribute('data-multiple') === 'true';
 
-            closeAllPopovers();
-            openUploadModal();
-          });
+          closeAllModals();
+          openUploadModal(isMultipleFiles);
         });
-      }
-      setupDropdownOptions(dropdownConvert);
-      setupDropdownOptions(dropdownCompress);
+      });
 
-      function openUploadModal() {
+      function openUploadModal(allowMultiple = false) {
         if (isDelivering) return;
         modalTitle.textContent = currentMode.startsWith('compress') ? 'TRẠM TIẾP NHẬN NÉN TỆP' : 'TRẠM TIẾP NHẬN CHUYỂN ĐỔI';
         modeDisplayName.textContent = `Tùy chọn: ${currentModeName}`;
-        dropzoneInstruction.textContent = `Kéo thả file vào đây hoặc bấm để chọn`;
+        dropzoneInstruction.textContent = allowMultiple ? `Kéo thả một hoặc nhiều file vào đây` : `Kéo thả file vào đây hoặc bấm để chọn`;
         dropzoneHint.textContent = `(Định dạng hỗ trợ: ${currentAccept})`;
 
         fileInput.accept = currentAccept;
+        fileInput.multiple = allowMultiple;
 
-        if (currentMode.startsWith('compress')) {
+        if (currentMode === 'compress_image') {
           compressSettingsBox.classList.add('active');
         } else {
           compressSettingsBox.classList.remove('active');
@@ -2017,11 +2243,6 @@
         clearSelectedFile();
         uploadModal.style.display = 'flex';
       }
-
-      btnCloseUpload.addEventListener('click', () => {
-        audio.click();
-        uploadModal.style.display = 'none';
-      });
 
       compressQualitySlider.addEventListener('input', (e) => {
         sliderValLabel.textContent = e.target.value + '%';
@@ -2052,28 +2273,38 @@
       dropzone.addEventListener('drop', (e) => {
         const dt = e.dataTransfer;
         if (dt && dt.files && dt.files.length > 0) {
-          handleFileChosen(dt.files[0]);
+          handleFilesChosen(dt.files);
         }
       });
 
       fileInput.addEventListener('change', (e) => {
         if (e.target.files && e.target.files.length > 0) {
-          handleFileChosen(e.target.files[0]);
+          handleFilesChosen(e.target.files);
         }
       });
 
-      function handleFileChosen(file) {
-        selectedFile = file;
+      function handleFilesChosen(files) {
+        if (!files || files.length === 0) return;
+        selectedFiles = Array.from(files);
+        selectedFile = selectedFiles[0];
         audio.fileDrop();
-        loadedFileName.textContent = file.name;
-        loadedFileSize.textContent = `(${formatBytes(file.size)})`;
+
+        if (selectedFiles.length === 1) {
+          loadedFileName.textContent = selectedFile.name;
+          loadedFileSize.textContent = `(${formatBytes(selectedFile.size)})`;
+        } else {
+          const totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+          loadedFileName.textContent = `${selectedFiles.length} tệp đã chọn (${selectedFiles.map(f => f.name).slice(0, 2).join(', ')}${selectedFiles.length > 2 ? '...' : ''})`;
+          loadedFileSize.textContent = `(${formatBytes(totalBytes)})`;
+        }
+
         filePreviewStrip.classList.add('active');
         btnStartProcess.disabled = false;
-        showToast(`ĐÃ NHẬN TỆP: ${file.name}`);
+        showToast(`ĐÃ NHẬN: ${selectedFiles.length === 1 ? selectedFile.name : selectedFiles.length + ' TỆP'}`);
 
         // Immediate Pipeline: Close modal and start delivery immediately
         setTimeout(() => {
-          if (selectedFile && !isDelivering && uploadModal.style.display === 'flex') {
+          if (selectedFiles.length > 0 && !isDelivering && uploadModal.style.display === 'flex') {
             uploadModal.style.display = 'none';
             startDeliveryJourney();
           }
@@ -2081,6 +2312,7 @@
       }
 
       function clearSelectedFile() {
+        selectedFiles = [];
         selectedFile = null;
         fileInput.value = '';
         filePreviewStrip.classList.remove('active');
@@ -2094,7 +2326,7 @@
       });
 
       btnStartProcess.addEventListener('click', () => {
-        if (!selectedFile || isDelivering) return;
+        if (selectedFiles.length === 0 || isDelivering) return;
         audio.click();
         uploadModal.style.display = 'none';
         startDeliveryJourney();
@@ -2304,9 +2536,10 @@
       async function runConversionEngine(file, mode, options = {}) {
         const quality = options.quality || 0.7;
         const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        const filesToProcess = (selectedFiles && selectedFiles.length > 0) ? selectedFiles : [file];
 
         switch (mode) {
-          // A. PDF to PNG (pdf.js)
+          // 1. PDF to PNG (pdf.js)
           case 'pdf_to_png': {
             if (window.pdfjsLib) {
               window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -2333,45 +2566,7 @@
             break;
           }
 
-          // B. PNG to JPEG (Canvas API)
-          case 'png_to_jpeg': {
-            const img = await loadImageFromFile(file);
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-
-            const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
-            return {
-              blob,
-              name: `${baseName}.jpg`,
-              origSize: file.size,
-              newSize: blob.size
-            };
-          }
-
-          // C. JPEG to WEBP (Canvas API)
-          case 'jpeg_to_webp': {
-            const img = await loadImageFromFile(file);
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-
-            const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', 0.82));
-            return {
-              blob,
-              name: `${baseName}.webp`,
-              origSize: file.size,
-              newSize: blob.size
-            };
-          }
-
-          // D. Excel (.xlsx) to PDF (SheetJS + jsPDF)
+          // 2. Excel (.xlsx) to PDF (SheetJS + jsPDF)
           case 'excel_to_pdf': {
             if (window.XLSX && window.jspdf) {
               const buffer = await file.arrayBuffer();
@@ -2408,7 +2603,7 @@
             break;
           }
 
-          // E. TXT to PDF (jsPDF)
+          // 3. TXT / Markdown to PDF (jsPDF)
           case 'txt_to_pdf': {
             const text = await file.text();
             const { jsPDF } = window.jspdf || {};
@@ -2444,7 +2639,214 @@
             break;
           }
 
-          // F. Compress Image (Canvas API with quality downscale)
+          // 4. Word (.docx) to PDF (Mammoth + jsPDF)
+          case 'word_to_pdf': {
+            if (window.mammoth && window.jspdf) {
+              const arrayBuffer = await file.arrayBuffer();
+              const result = await window.mammoth.extractRawText({ arrayBuffer });
+              const text = result.value || '';
+              const { jsPDF } = window.jspdf;
+              const doc = new jsPDF();
+              doc.setFont('courier', 'normal');
+              doc.setFontSize(10);
+
+              doc.text(`[ BUU DIEN SAI GON - TAI LIEU WORD ]`, 14, 15);
+              doc.text(`File: ${file.name}`, 14, 22);
+              doc.setLineWidth(0.5);
+              doc.line(14, 25, 196, 25);
+
+              const splitText = doc.splitTextToSize(text, 180);
+              let cursorY = 32;
+              for (let i = 0; i < splitText.length; i++) {
+                if (cursorY > 280) {
+                  doc.addPage();
+                  cursorY = 20;
+                }
+                doc.text(splitText[i], 14, cursorY);
+                cursorY += 6;
+              }
+
+              const blob = doc.output('blob');
+              return {
+                blob,
+                name: `${baseName}.pdf`,
+                origSize: file.size,
+                newSize: blob.size
+              };
+            }
+            break;
+          }
+
+          // 5. PNG to JPEG (Canvas API)
+          case 'png_to_jpeg': {
+            const img = await loadImageFromFile(file);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.88));
+            return {
+              blob,
+              name: `${baseName}.jpg`,
+              origSize: file.size,
+              newSize: blob.size
+            };
+          }
+
+          // 6. JPEG to PNG (Canvas API)
+          case 'jpeg_to_png': {
+            const img = await loadImageFromFile(file);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+            return {
+              blob,
+              name: `${baseName}.png`,
+              origSize: file.size,
+              newSize: blob.size
+            };
+          }
+
+          // 7. Image to WEBP (Canvas API)
+          case 'image_to_webp':
+          case 'jpeg_to_webp': {
+            const img = await loadImageFromFile(file);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', 0.85));
+            return {
+              blob,
+              name: `${baseName}.webp`,
+              origSize: file.size,
+              newSize: blob.size
+            };
+          }
+
+          // 8. Multi-Image to PDF (jsPDF)
+          case 'image_to_pdf': {
+            if (window.jspdf) {
+              const { jsPDF } = window.jspdf;
+              const doc = new jsPDF();
+              const imgsToConvert = filesToProcess;
+
+              for (let i = 0; i < imgsToConvert.length; i++) {
+                const f = imgsToConvert[i];
+                const img = await loadImageFromFile(f);
+                if (i > 0) doc.addPage();
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 10;
+                const maxW = pageWidth - margin * 2;
+                const maxH = pageHeight - margin * 2;
+
+                let renderW = img.width;
+                let renderH = img.height;
+                const ratio = Math.min(maxW / renderW, maxH / renderH);
+                renderW *= ratio;
+                renderH *= ratio;
+                const posX = margin + (maxW - renderW) / 2;
+                const posY = margin + (maxH - renderH) / 2;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                doc.addImage(dataUrl, 'JPEG', posX, posY, renderW, renderH);
+              }
+
+              const blob = doc.output('blob');
+              const totalOrig = imgsToConvert.reduce((acc, f) => acc + f.size, 0);
+              return {
+                blob,
+                name: `${baseName}.pdf`,
+                origSize: totalOrig,
+                newSize: blob.size
+              };
+            }
+            break;
+          }
+
+          // 9. JSON to CSV
+          case 'json_to_csv': {
+            const text = await file.text();
+            let parsed = JSON.parse(text);
+            if (!Array.isArray(parsed)) {
+              parsed = [parsed];
+            }
+            const headers = Array.from(new Set(parsed.flatMap(item => typeof item === 'object' && item !== null ? Object.keys(item) : [])));
+            const csvRows = [];
+            csvRows.push(headers.join(','));
+            parsed.forEach(item => {
+              const values = headers.map(header => {
+                let val = item[header];
+                if (val === undefined || val === null) val = '';
+                val = String(val).replace(/"/g, '""');
+                if (val.includes(',') || val.includes('\n') || val.includes('"')) {
+                  val = `"${val}"`;
+                }
+                return val;
+              });
+              csvRows.push(values.join(','));
+            });
+            const csvContent = '\uFEFF' + csvRows.join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            return {
+              blob,
+              name: `${baseName}.csv`,
+              origSize: file.size,
+              newSize: blob.size
+            };
+          }
+
+          // 10. CSV to JSON
+          case 'csv_to_json': {
+            let jsonData = [];
+            if (window.XLSX) {
+              const buffer = await file.arrayBuffer();
+              const wb = window.XLSX.read(buffer, { type: 'array' });
+              const ws = wb.Sheets[wb.SheetNames[0]];
+              jsonData = window.XLSX.utils.sheet_to_json(ws);
+            } else {
+              const text = await file.text();
+              const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+              if (lines.length > 0) {
+                const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+                for (let i = 1; i < lines.length; i++) {
+                  const currentline = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+                  const obj = {};
+                  for (let j = 0; j < headers.length; j++) {
+                    obj[headers[j]] = currentline[j] || '';
+                  }
+                  jsonData.push(obj);
+                }
+              }
+            }
+            const jsonStr = JSON.stringify(jsonData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+            return {
+              blob,
+              name: `${baseName}.json`,
+              origSize: file.size,
+              newSize: blob.size
+            };
+          }
+
+          // 11. Compress Image (Canvas API with quality downscale)
           case 'compress_image': {
             const img = await loadImageFromFile(file);
             let targetW = img.width;
@@ -2478,7 +2880,7 @@
             };
           }
 
-          // G. Compress PDF (pdf-lib)
+          // 12. Compress PDF (pdf-lib)
           case 'compress_pdf': {
             if (window.PDFLib) {
               const buffer = await file.arrayBuffer();
@@ -2495,17 +2897,25 @@
             break;
           }
 
-          // H. Compress ZIP (JSZip)
+          // 13. Compress ZIP (JSZip)
           case 'compress_zip': {
             if (window.JSZip) {
               const zip = new window.JSZip();
-              const buffer = await file.arrayBuffer();
-              zip.file(file.name, buffer);
-              const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+              const filesToZip = filesToProcess;
+              for (const f of filesToZip) {
+                const buf = await f.arrayBuffer();
+                zip.file(f.name, buf);
+              }
+              const blob = await zip.generateAsync({
+                type: 'blob',
+                compression: 'DEFLATE',
+                compressionOptions: { level: 9 }
+              });
+              const totalOrig = filesToZip.reduce((acc, f) => acc + f.size, 0);
               return {
                 blob,
                 name: `${baseName}.zip`,
-                origSize: file.size,
+                origSize: totalOrig,
                 newSize: blob.size
               };
             }
@@ -2539,6 +2949,8 @@
         else if (mode.includes('jpeg') || mode.includes('jpg')) newExt = '.jpg';
         else if (mode.includes('webp')) newExt = '.webp';
         else if (mode.includes('zip')) newExt = '.zip';
+        else if (mode.includes('csv')) newExt = '.csv';
+        else if (mode.includes('json')) newExt = '.json';
 
         const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
         return {
@@ -2558,12 +2970,12 @@
       function applyTestState() {
         if (!testState) return;
         if (testState === 'convert_menu') {
-          wrapperConvert.classList.add('menu-open');
+          convertModal.style.display = 'flex';
         } else if (testState === 'compress_menu') {
-          wrapperCompress.classList.add('menu-open');
+          compressModal.style.display = 'flex';
         } else if (testState === 'upload') {
           currentMode = 'pdf_to_png';
-          currentModeName = 'PDF to PNG';
+          currentModeName = 'PDF to PNG / JPG';
           currentAccept = '.pdf';
           openUploadModal();
         } else if (testState === 'processing') {
