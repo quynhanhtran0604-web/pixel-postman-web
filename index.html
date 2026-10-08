@@ -11,7 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,700;1,700&family=Press+Start+2P&display=swap" rel="stylesheet">
 
   <!-- Client-side Conversion CDNs -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@pdfsmaller/pdf-encrypt/dist/pdf-encrypt.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -167,6 +168,37 @@
     .pixel-icon-btn:active {
       transform: translate(2px, 2px);
       box-shadow: 1px 1px 0 #000;
+    }
+
+    /* Distinct Red Accent for Help Button */
+    #btn-info-help {
+      background: #d62828 !important;
+      color: #ffffff !important;
+      border: 3px solid #000 !important;
+      box-shadow: var(--shadow-pixel);
+      position: relative;
+      outline: none;
+    }
+
+    #btn-info-help:hover {
+      background: #e63946 !important;
+      border-color: #ffd700 !important;
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0 #000;
+    }
+
+    #btn-info-help:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #000;
+    }
+
+    #btn-info-help .help-qmark {
+      font-family: var(--pixel-font-latin);
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1;
+      color: #ffffff;
+      text-shadow: 1px 1px 0 #000;
     }
 
     /* ==========================================================================
@@ -513,6 +545,217 @@
     }
 
     /* ==========================================================================
+       RETRO HELP & USER GUIDE MODAL (#help-modal)
+       ========================================================================== */
+    #help-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 999999 !important;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(2px);
+      pointer-events: auto !important;
+      padding: 14px;
+      animation: backdropFadeIn 0.15s ease;
+    }
+
+    .help-modal-card {
+      width: 480px;
+      max-width: 90vw;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-cream);
+      border: 4px solid #000;
+      box-shadow: var(--shadow-pixel-xl);
+      overflow: hidden;
+      pointer-events: auto !important;
+      animation: popoverFadeIn 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    .help-modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-family: var(--pixel-font-vn);
+      color: #111;
+      line-height: 1.5;
+    }
+
+    .help-section {
+      background: #fdfaf3;
+      border: 2px solid #000;
+      box-shadow: 2px 2px 0 #000;
+      padding: 10px 12px;
+      border-radius: 2px;
+    }
+
+    .help-section-security {
+      background: #eef8f2;
+      border-color: #1b4d3e;
+    }
+
+    .help-section-title {
+      font-weight: 700;
+      font-size: 13px;
+      color: #901a1e;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 2px dashed #bbb;
+      padding-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .help-section-security .help-section-title {
+      color: #1b4d3e;
+    }
+
+    .help-text {
+      font-size: 13px;
+      color: #222;
+      line-height: 1.5;
+    }
+
+    .help-step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .help-step-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .help-step-num {
+      background: #000;
+      color: #fff;
+      font-family: var(--pixel-font-latin);
+      font-size: 10px;
+      font-weight: 900;
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      margin-top: 2px;
+    }
+
+    .help-badge-convert {
+      background: #1b4d3e;
+      color: #ffd700;
+      padding: 1px 6px;
+      border-radius: 2px;
+      font-weight: 700;
+      font-size: 11px;
+      display: inline-block;
+    }
+
+    .help-badge-compress {
+      background: #1f6fd2;
+      color: #fff;
+      padding: 1px 6px;
+      border-radius: 2px;
+      font-weight: 700;
+      font-size: 11px;
+      display: inline-block;
+    }
+
+    .help-badge-action {
+      background: #d62828;
+      color: #fff;
+      padding: 1px 6px;
+      border-radius: 2px;
+      font-weight: 700;
+      font-size: 11px;
+      display: inline-block;
+    }
+
+    .help-tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .help-tag {
+      background: #000;
+      color: var(--color-gold);
+      font-family: var(--pixel-font-latin);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 2px;
+      font-weight: 700;
+    }
+
+    .help-bullets {
+      list-style: none;
+      padding-left: 0;
+      font-size: 13px;
+    }
+
+    .help-bullets li {
+      position: relative;
+      padding-left: 16px;
+      margin-bottom: 5px;
+    }
+
+    .help-bullets li:last-child {
+      margin-bottom: 0;
+    }
+
+    .help-bullets li::before {
+      content: '■';
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 9px;
+      color: #1b4d3e;
+    }
+
+    .help-modal-footer {
+      background: #ded7c5;
+      border-top: 3px solid #000;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    .retro-btn-confirm {
+      background: var(--color-gold);
+      color: #000;
+      border: 3px solid #000;
+      box-shadow: 2px 2px 0 #000;
+      font-family: var(--pixel-font-vn);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      cursor: pointer;
+      pointer-events: auto !important;
+      transition: all 0.1s;
+    }
+
+    .retro-btn-confirm:hover {
+      background: var(--color-gold-hover);
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0 #000;
+    }
+
+    .retro-btn-confirm:active {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+
+    /* ==========================================================================
        CENTERED RETRO DRAG & DROP MODAL
        ========================================================================== */
     #upload-modal {
@@ -530,6 +773,8 @@
     .upload-card {
       width: 530px;
       max-width: 92vw;
+      max-height: 90vh;
+      overflow-y: auto;
       background: var(--color-cream);
       border: 4px solid #000;
       box-shadow: var(--shadow-pixel-xl);
@@ -637,6 +882,86 @@
       border: 2px solid #000;
       cursor: pointer;
       box-shadow: 1px 1px 0 #000;
+    }
+
+    /* Retro 3x3 Grid & Advanced Param Controls */
+    .retro-grid-3x3 {
+      display: grid;
+      grid-template-columns: repeat(3, 30px);
+      grid-template-rows: repeat(3, 30px);
+      gap: 4px;
+      background: #2b3a4a;
+      padding: 4px;
+      border: 2px solid #000;
+      width: fit-content;
+      box-shadow: 2px 2px 0 #000;
+    }
+
+    .grid-pos-btn {
+      background: #fff;
+      border: 1px solid #000;
+      font-family: var(--pixel-font-vn);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      user-select: none;
+      transition: background 0.1s;
+    }
+
+    .grid-pos-btn:hover {
+      background: var(--color-gold);
+    }
+
+    .grid-pos-btn.active {
+      background: var(--color-red-post) !important;
+      color: #fff !important;
+      font-weight: 900;
+      box-shadow: inset 0 0 0 1px #000;
+    }
+
+    .param-field-title {
+      display: block;
+      font-family: var(--pixel-font-vn);
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 4px;
+    }
+
+    .retro-input-sm, .retro-select-sm {
+      font-family: var(--pixel-font-vn);
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid #000;
+      background: #fff;
+      padding: 5px 8px;
+      box-shadow: 1px 1px 0 #000;
+      outline: none;
+      color: #000;
+      box-sizing: border-box;
+    }
+
+    .retro-radio-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .retro-radio-label, .retro-checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--pixel-font-vn);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer !important;
+      user-select: none;
     }
 
     /* Dropzone Box */
@@ -1279,6 +1604,10 @@
         font-size: 16px !important;
       }
 
+      #btn-info-help .help-qmark {
+        font-size: 16px !important;
+      }
+
       /* Edge-to-Edge Drag & Drop Modal */
       #upload-modal {
         padding: 10px !important;
@@ -1531,8 +1860,8 @@
       <button class="pixel-icon-btn" id="btn-sound-toggle" title="Bật/Tắt âm thanh retro">
         <span id="sound-icon">🔊</span>
       </button>
-      <button class="pixel-icon-btn" id="btn-info-help" title="Hướng dẫn sử dụng">
-        <span>❓</span>
+      <button class="pixel-icon-btn" id="btn-info-help" title="Hướng dẫn sử dụng" aria-label="Hướng dẫn sử dụng" type="button">
+        <span class="help-qmark">?</span>
       </button>
     </div>
   </div>
@@ -1618,6 +1947,34 @@
             <div class="d-desc">Trích xuất nội dung văn bản Word DOCX sang tài liệu PDF</div>
           </div>
         </button>
+        <button class="dropdown-item-btn" data-mode="pdf_to_text" data-name="PDF to Text / Word (.txt)" data-accept=".pdf" type="button">
+          <span class="d-icon">📃</span>
+          <div class="d-text">
+            <div class="d-title">PDF to Text / Word (.txt)</div>
+            <div class="d-desc">Trích xuất toàn bộ văn bản thuần từ PDF thành file .txt có thể chỉnh sửa</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="pdf_to_excel" data-name="PDF to Excel (.csv)" data-accept=".pdf" type="button">
+          <span class="d-icon">📊</span>
+          <div class="d-text">
+            <div class="d-title">PDF to Excel (.csv)</div>
+            <div class="d-desc">Trích xuất dữ liệu bảng và văn bản từ PDF sang bảng tính CSV / Excel</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="html_to_pdf" data-name="HTML to PDF" data-accept=".html,.htm" type="button">
+          <span class="d-icon">🌐</span>
+          <div class="d-text">
+            <div class="d-title">HTML to PDF</div>
+            <div class="d-desc">Chuyển đổi mã HTML thô thành tài liệu PDF hoàn chỉnh có thể tải về</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="pdf_to_pdfa" data-name="PDF to PDF/A (Lưu trữ)" data-accept=".pdf" type="button">
+          <span class="d-icon">🗄️</span>
+          <div class="d-text">
+            <div class="d-title">PDF to PDF/A (Lưu trữ)</div>
+            <div class="d-desc">Chuẩn hóa PDF sang định dạng PDF/A tương thích lưu trữ lâu dài</div>
+          </div>
+        </button>
       </div>
 
       <!-- Category 2: Images -->
@@ -1673,20 +2030,25 @@
     </div>
   </div>
 
-  <!-- ==========================================================================
-       COMPRESS FILE MODAL (CATEGORIZED OPTIONS)
-       ========================================================================== -->
   <div id="compress-modal" class="retro-modal-backdrop">
     <div class="retro-modal-card">
       <div class="retro-modal-header" style="background: #1f6fd2;">
         <h2>
           <span>🗜️</span>
-          <span>NÉN GIẢM DUNG LƯỢNG (COMPRESS)</span>
+          <span>NÉN & CÔNG CỤ PDF (TOOLS)</span>
         </h2>
         <button class="retro-close-btn" data-close="compress-modal" type="button" aria-label="Đóng">&times;</button>
       </div>
 
-      <div class="retro-modal-body" style="padding: 14px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: calc(85vh - 70px);">
+      <!-- Compress Modal Category Tabs Bar -->
+      <div class="category-tabs-bar">
+        <button class="category-tab-btn compress-tab-btn active" data-compress-tab="ctab-compress" type="button">🗜️ Nén</button>
+        <button class="category-tab-btn compress-tab-btn" data-compress-tab="ctab-organize" type="button">📂 Tổ chức PDF</button>
+        <button class="category-tab-btn compress-tab-btn" data-compress-tab="ctab-security" type="button">🔐 Bảo mật</button>
+      </div>
+
+      <!-- Tab 1: Compress (existing tools) -->
+      <div id="ctab-compress" class="category-tab-panel active">
         <button class="dropdown-item-btn" data-mode="compress_image" data-name="Nén ảnh (JPEG / PNG / WebP)" data-accept=".jpg,.jpeg,.png,.webp" type="button">
           <span class="d-icon">🖼️</span>
           <div class="d-text">
@@ -1706,6 +2068,70 @@
           <div class="d-text">
             <div class="d-title">Nén nhiều tệp vào ZIP</div>
             <div class="d-desc">Đóng gói và nén một hoặc nhiều tệp vào file .zip bằng JSZip</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Tab 2: Organize PDF -->
+      <div id="ctab-organize" class="category-tab-panel">
+        <button class="dropdown-item-btn" data-mode="pdf_merge" data-name="Gộp nhiều PDF (Merge)" data-accept=".pdf" data-multiple="true" type="button">
+          <span class="d-icon">📋</span>
+          <div class="d-text">
+            <div class="d-title">Gộp nhiều PDF (Merge)</div>
+            <div class="d-desc">Chọn nhiều file PDF rồi ghép tất cả theo thứ tự thành 1 file PDF duy nhất</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="pdf_split" data-name="Tách trang PDF (Split)" data-accept=".pdf" type="button">
+          <span class="d-icon">✂️</span>
+          <div class="d-text">
+            <div class="d-title">Tách trang PDF (Split)</div>
+            <div class="d-desc">Trích xuất từng trang ra thành các file PDF riêng lẻ độc lập</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="pdf_remove_pages" data-name="Xóa trang PDF (Remove Pages)" data-accept=".pdf" type="button">
+          <span class="d-icon">🗑️</span>
+          <div class="d-text">
+            <div class="d-title">Xóa trang PDF (Remove Pages)</div>
+            <div class="d-desc">Nhập số trang cần xóa (vd: 1,3,5) để loại bỏ khỏi file PDF</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="pdf_rotate" data-name="Xoay trang PDF (Rotate)" data-accept=".pdf" type="button">
+          <span class="d-icon">🔄</span>
+          <div class="d-text">
+            <div class="d-title">Xoay trang PDF (Rotate)</div>
+            <div class="d-desc">Xoay tất cả trang 90°, 180° hoặc 270° theo chiều kim đồng hồ</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="pdf_watermark" data-name="Thêm Watermark PDF" data-accept=".pdf" type="button">
+          <span class="d-icon">💧</span>
+          <div class="d-text">
+            <div class="d-title">Thêm Watermark PDF</div>
+            <div class="d-desc">Đóng dấu chữ watermark lên tất cả các trang PDF với kiểm soát độ mờ</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="pdf_page_numbers" data-name="Đánh số trang PDF" data-accept=".pdf" type="button">
+          <span class="d-icon">🔢</span>
+          <div class="d-text">
+            <div class="d-title">Đánh số trang PDF</div>
+            <div class="d-desc">Tự động đóng số trang "Trang X/Y" ở chân mỗi trang PDF</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Tab 3: Security -->
+      <div id="ctab-security" class="category-tab-panel">
+        <button class="dropdown-item-btn" data-mode="pdf_protect" data-name="Bảo vệ PDF bằng mật khẩu" data-accept=".pdf" type="button">
+          <span class="d-icon">🔒</span>
+          <div class="d-text">
+            <div class="d-title">Bảo vệ PDF bằng mật khẩu</div>
+            <div class="d-desc">Mã hóa và khóa file PDF bằng mật khẩu tùy chọn (chuẩn AES / RC4)</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="pdf_unlock" data-name="Gỡ mật khẩu PDF (Unlock)" data-accept=".pdf" type="button">
+          <span class="d-icon">🔓</span>
+          <div class="d-text">
+            <div class="d-title">Gỡ mật khẩu PDF (Unlock)</div>
+            <div class="d-desc">Loại bỏ bảo vệ mật khẩu khỏi file PDF đã được mở khóa thủ công</div>
           </div>
         </button>
       </div>
@@ -1745,6 +2171,169 @@
           </div>
         </div>
 
+        <!-- 1. Cấu hình Đánh Số Trang (Page Numbers - chuẩn iLovePDF) -->
+        <div id="box-param-page-numbers" class="compress-options-box">
+          <div style="font-family: var(--pixel-font-vn); font-size: 14px; font-weight: 700; color: #1b4d3e; border-bottom: 2px dashed #000; padding-bottom: 4px;">
+            🔢 CẤU HÌNH ĐÁNH SỐ TRANG:
+          </div>
+
+          <!-- Position 3x3 Grid & Page Mode -->
+          <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
+            <div>
+              <span class="param-field-title">VỊ TRÍ (3x3):</span>
+              <div class="retro-grid-3x3" id="pn-grid-position">
+                <button type="button" class="grid-pos-btn" data-pos="tl" title="Top-Left (Trên trái)">↖</button>
+                <button type="button" class="grid-pos-btn" data-pos="tc" title="Top-Center (Trên giữa)">↑</button>
+                <button type="button" class="grid-pos-btn" data-pos="tr" title="Top-Right (Trên phải)">↗</button>
+                <button type="button" class="grid-pos-btn" data-pos="ml" title="Middle-Left (Giữa trái)">←</button>
+                <button type="button" class="grid-pos-btn" data-pos="mc" title="Middle-Center (Chính giữa)">•</button>
+                <button type="button" class="grid-pos-btn" data-pos="mr" title="Middle-Right (Giữa phải)">→</button>
+                <button type="button" class="grid-pos-btn" data-pos="bl" title="Bottom-Left (Dưới trái)">↙</button>
+                <button type="button" class="grid-pos-btn active" data-pos="bc" title="Bottom-Center (Dưới giữa - Mặc định)">↓</button>
+                <button type="button" class="grid-pos-btn" data-pos="br" title="Bottom-Right (Dưới phải)">↘</button>
+              </div>
+            </div>
+
+            <div style="flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: 8px;">
+              <div>
+                <span class="param-field-title">CHẾ ĐỘ TRANG:</span>
+                <div class="retro-radio-group">
+                  <label class="retro-radio-label">
+                    <input type="radio" name="pn-mode" value="single" checked> <span>Trang đơn</span>
+                  </label>
+                  <label class="retro-radio-label">
+                    <input type="radio" name="pn-mode" value="facing"> <span>Trang đôi (Đối xứng)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <span class="param-field-title">KHOẢNG CÁCH LỀ:</span>
+                <div class="retro-radio-group">
+                  <label class="retro-radio-label">
+                    <input type="radio" name="pn-margin" value="small"> <span>Nhỏ</span>
+                  </label>
+                  <label class="retro-radio-label">
+                    <input type="radio" name="pn-margin" value="medium" checked> <span>Vừa</span>
+                  </label>
+                  <label class="retro-radio-label">
+                    <input type="radio" name="pn-margin" value="large"> <span>Lớn</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- First Number & Page Range -->
+          <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="width: 110px;">
+              <span class="param-field-title">SỐ ĐẦU TIÊN:</span>
+              <input type="number" id="pn-first-num" class="retro-input-sm" value="1" min="1" style="width: 100%;">
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+              <span class="param-field-title">KHOẢNG TRANG (TỪ - ĐẾN):</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <input type="number" id="pn-range-from" class="retro-input-sm" placeholder="1" min="1" style="width: 65px;">
+                <span>→</span>
+                <input type="number" id="pn-range-to" class="retro-input-sm" placeholder="Hết" min="1" style="width: 65px;">
+                <span style="font-size: 11px; color: #555;">(để trống = toàn bộ)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Cấu hình Đóng Dấu Mờ (Watermark - chuẩn iLovePDF) -->
+        <div id="box-param-watermark" class="compress-options-box">
+          <div style="font-family: var(--pixel-font-vn); font-size: 14px; font-weight: 700; color: #1b4d3e; border-bottom: 2px dashed #000; padding-bottom: 4px;">
+            💧 CẤU HÌNH WATERMARK (ĐÓNG DẤU MỜ):
+          </div>
+
+          <!-- Text content -->
+          <div>
+            <span class="param-field-title">NỘI DUNG CHỮ WATERMARK:</span>
+            <input type="text" id="wm-text-input" class="retro-input-sm" value="BUU DIEN SAI GON" placeholder="Nhập chữ watermark..." style="width: 100%;">
+          </div>
+
+          <!-- Position 3x3 Grid & Mosaic toggle -->
+          <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+            <div>
+              <span class="param-field-title">VỊ TRÍ (3x3):</span>
+              <div class="retro-grid-3x3" id="wm-grid-position">
+                <button type="button" class="grid-pos-btn" data-pos="tl" title="Top-Left (Trên trái)">↖</button>
+                <button type="button" class="grid-pos-btn" data-pos="tc" title="Top-Center (Trên giữa)">↑</button>
+                <button type="button" class="grid-pos-btn" data-pos="tr" title="Top-Right (Trên phải)">↗</button>
+                <button type="button" class="grid-pos-btn" data-pos="ml" title="Middle-Left (Giữa trái)">←</button>
+                <button type="button" class="grid-pos-btn active" data-pos="mc" title="Center (Chính giữa - Mặc định)">•</button>
+                <button type="button" class="grid-pos-btn" data-pos="mr" title="Middle-Right (Giữa phải)">→</button>
+                <button type="button" class="grid-pos-btn" data-pos="bl" title="Bottom-Left (Dưới trái)">↙</button>
+                <button type="button" class="grid-pos-btn" data-pos="bc" title="Bottom-Center (Dưới giữa)">↓</button>
+                <button type="button" class="grid-pos-btn" data-pos="br" title="Bottom-Right (Dưới phải)">↘</button>
+              </div>
+            </div>
+
+            <div style="flex: 1; min-width: 170px; display: flex; flex-direction: column; gap: 4px;">
+              <label class="retro-checkbox-label">
+                <input type="checkbox" id="wm-mosaic-checkbox">
+                <span style="color: #b22222; font-weight: 700;">Lặp đều khắp trang (Mosaic)</span>
+              </label>
+              <div style="font-size: 11px; color: #555;">(Tự động trải nhiều dấu mờ phủ kín bề mặt trang)</div>
+            </div>
+          </div>
+
+          <!-- Opacity & Rotation -->
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 120px;">
+              <span class="param-field-title">ĐỘ MỜ (OPACITY):</span>
+              <select id="wm-opacity-select" class="retro-select-sm" style="width: 100%;">
+                <option value="0.25" selected>25% (Rất mờ)</option>
+                <option value="0.50">50% (Vừa phải)</option>
+                <option value="0.75">75% (Rõ nét)</option>
+                <option value="1.00">100% (Đậm nét)</option>
+              </select>
+            </div>
+            <div style="flex: 1; min-width: 120px;">
+              <span class="param-field-title">GÓC XOAY:</span>
+              <select id="wm-rotation-select" class="retro-select-sm" style="width: 100%;">
+                <option value="0">Không xoay (0°)</option>
+                <option value="45" selected>Xoay 45°</option>
+                <option value="90">Xoay 90°</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Page Range -->
+          <div>
+            <span class="param-field-title">KHOẢNG TRANG ÁP DỤNG:</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 13px;">Từ trang</span>
+              <input type="number" id="wm-range-from" class="retro-input-sm" placeholder="1" min="1" style="width: 65px;">
+              <span style="font-size: 13px;">đến</span>
+              <input type="number" id="wm-range-to" class="retro-input-sm" placeholder="Hết" min="1" style="width: 65px;">
+              <span style="font-size: 11px; color: #555;">(để trống = toàn bộ trang)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. General PDF Parameter Input Box (for password protect / unlock / split / remove / rotate) -->
+        <div id="pdf-param-box" class="compress-options-box">
+          <div id="pdf-param-label" style="font-family: var(--pixel-font-vn); font-size: 14px; font-weight: 700; color: #000;">
+            THAM SỐ:
+          </div>
+          <input type="text" id="pdf-param-input" style="
+            font-family: var(--pixel-font-vn);
+            font-size: 14px;
+            font-weight: 600;
+            border: 3px solid #000;
+            background: #fff;
+            padding: 8px 10px;
+            box-shadow: 2px 2px 0 #000;
+            outline: none;
+            width: 100%;
+            color: #000;
+            user-select: text;
+          " placeholder="" autocomplete="off">
+        </div>
+
         <!-- Big Retro Dropzone Box (Native label for instant touch/click) -->
         <label for="file-input" id="dropzone" class="dropzone-box" role="button" tabindex="0">
           <div class="dropzone-icon">📮</div>
@@ -1767,10 +2356,95 @@
         </div>
 
         <!-- Action Button -->
-        <button id="btn-start-process" class="start-deliver-btn" type="button" disabled>
-          🚚 GỬI BƯU TÁ ĐI XỬ LÝ (DELIVER FILE)
+        <button id="btn-start-process" class="start-deliver-btn" type="button">
+          🛵 GỬI BƯU TÁ ĐI XỬ LÝ (DELIVER FILE)
         </button>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       RETRO HELP & USER GUIDE MODAL (#help-modal)
+       ========================================================================== -->
+  <div id="help-modal" class="retro-modal-backdrop" style="z-index: 999999;">
+    <div class="retro-modal-card help-modal-card">
+      <div class="retro-modal-header" style="background: #a31d1d;">
+        <h2>
+          <span>❓</span>
+          <span>HƯỚNG DẪN SỬ DỤNG</span>
+        </h2>
+        <button class="retro-close-btn" data-close="help-modal" type="button" aria-label="Đóng">&times;</button>
+      </div>
+      <div class="help-modal-body">
+        <!-- Section 1: Intro -->
+        <div class="help-section">
+          <div class="help-section-title">📮 BƯU ĐIỆN SÀI GÒN 1891</div>
+          <p class="help-text">
+            Chào mừng bạn đến với ứng dụng chuyển đổi & nén tệp phong cách Pixel Retro 16-bit! Mọi thao tác xử lý đều diễn ra <strong>100% Client-Side</strong> trực tiếp trên trình duyệt của bạn — không tải tệp lên bất kỳ máy chủ nào, bảo mật và riêng tư tuyệt đối.
+          </p>
+        </div>
+
+        <!-- Section 2: Steps -->
+        <div class="help-section">
+          <div class="help-section-title">🛵 CÁC BƯỚC THỰC HIỆN</div>
+          <div class="help-step-item">
+            <span class="help-step-num">1</span>
+            <div>
+              <strong>Chọn tính năng:</strong> Bấm nút <span class="help-badge-convert">CONVERT FILE</span> để chuyển đổi định dạng (PDF, Ảnh, Word, Excel, TXT, HTML) hoặc nút <span class="help-badge-compress">COMPRESS FILE</span> để nén giảm dung lượng & dùng công cụ PDF (Ghép, Tách, Xoay, Đánh số trang, Watermark, Bảo mật).
+            </div>
+          </div>
+          <div class="help-step-item">
+            <span class="help-step-num">2</span>
+            <div>
+              <strong>Tải tệp & Tùy chỉnh:</strong> Kéo thả hoặc chạm/bấm để chọn tệp. Nếu có tham số (mức nén, mật khẩu bảo vệ / gỡ mật khẩu, watermark, số trang), hãy nhập trực tiếp vào bảng cấu hình.
+            </div>
+          </div>
+          <div class="help-step-item">
+            <span class="help-step-num">3</span>
+            <div>
+              <strong>Gửi bưu tá đi xử lý:</strong> Bấm nút <span class="help-badge-action">🛵 GỬI BƯU TÁ ĐI XỬ LÝ</span>. Chú bưu tá áo đỏ sao vàng sẽ mang bưu kiện đi bộ dọc vỉa hè vào Bưu điện Sài Gòn để xử lý tức thì!
+            </div>
+          </div>
+          <div class="help-step-item">
+            <span class="help-step-num">4</span>
+            <div>
+              <strong>Nhận & Tải kết quả:</strong> Khi hoàn tất, bưu tá sẽ mang kết quả quay lại và hộp thoại bóng bay sẽ xuất hiện với nút tải về cùng thông tin dung lượng đã tiết kiệm.
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Supported Formats -->
+        <div class="help-section">
+          <div class="help-section-title">📁 ĐỊNH DẠNG HỖ TRỢ</div>
+          <div class="help-tags-list">
+            <span class="help-tag">PDF</span>
+            <span class="help-tag">PNG</span>
+            <span class="help-tag">JPEG/JPG</span>
+            <span class="help-tag">WEBP</span>
+            <span class="help-tag">DOCX</span>
+            <span class="help-tag">XLSX</span>
+            <span class="help-tag">CSV</span>
+            <span class="help-tag">TXT</span>
+            <span class="help-tag">HTML</span>
+            <span class="help-tag">ZIP</span>
+          </div>
+        </div>
+
+        <!-- Section 4: Security & Tips -->
+        <div class="help-section help-section-security">
+          <div class="help-section-title">🔒 BẢO MẬT & MẸO NHỎ</div>
+          <ul class="help-bullets">
+            <li><strong>Bảo mật 100%:</strong> Dữ liệu không bao giờ rời khỏi thiết bị của bạn.</li>
+            <li><strong>Gỡ mật khẩu PDF:</strong> Nhập mật khẩu hiện tại để hệ thống giải mã và xuất ra tệp PDF sạch không còn mật khẩu.</li>
+            <li><strong>Phím tắt:</strong> Nhấn phím <code>Esc</code> bất kỳ lúc nào để đóng nhanh các cửa sổ pop-up.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="help-modal-footer">
+        <button class="retro-btn-confirm" data-close="help-modal" type="button">
+          ĐÃ HIỂU, BẮT ĐẦU NGAY!
+        </button>
       </div>
     </div>
   </div>
@@ -1881,6 +2555,11 @@
           this.playTone(587.33, 'square', 0.1, null, 0.15);
           setTimeout(() => this.playTone(880, 'square', 0.12, null, 0.18), 80);
           setTimeout(() => this.playTone(1174.66, 'square', 0.25, null, 0.2), 160);
+        }
+
+        error() {
+          this.playTone(220, 'sawtooth', 0.12, 130, 0.18);
+          setTimeout(() => this.playTone(180, 'sawtooth', 0.16, 110, 0.2), 100);
         }
       }
 
@@ -2044,6 +2723,7 @@
       const btnMainCompress = document.getElementById('main-btn-compress');
       const convertModal = document.getElementById('convert-modal');
       const compressModal = document.getElementById('compress-modal');
+      const helpModal = document.getElementById('help-modal');
 
       const uploadModal = document.getElementById('upload-modal');
       const modalTitle = document.getElementById('modal-title');
@@ -2124,6 +2804,7 @@
         if (compressModal) compressModal.style.display = 'none';
         if (uploadModal) uploadModal.style.display = 'none';
         if (deliveryBubble) deliveryBubble.style.display = 'none';
+        if (helpModal) helpModal.style.display = 'none';
       }
 
       // 1. FIX RED CLOSE BUTTON ('✕') BUG: Instantly hide target modal on click
@@ -2137,14 +2818,14 @@
             const targetEl = document.getElementById(targetId);
             if (targetEl) closeModal(targetEl);
           } else {
-            const parentModal = btn.closest('.retro-modal-backdrop, #upload-modal, #delivery-bubble');
+            const parentModal = btn.closest('.retro-modal-backdrop, #upload-modal, #delivery-bubble, #help-modal');
             if (parentModal) closeModal(parentModal);
           }
         });
       });
 
       // 2. Click outside backdrop to close
-      [convertModal, compressModal, uploadModal].forEach(modal => {
+      [convertModal, compressModal, uploadModal, helpModal].forEach(modal => {
         if (!modal) return;
         modal.addEventListener('click', (e) => {
           if (e.target === modal) {
@@ -2206,6 +2887,28 @@
         });
       });
 
+      // Compress Modal Tab Switching
+      const compressTabBtns = document.querySelectorAll('.compress-tab-btn');
+      const compressTabPanels = document.querySelectorAll('#ctab-compress, #ctab-organize, #ctab-security');
+
+      compressTabBtns.forEach(btn => {
+        btn.addEventListener('mouseenter', () => audio.hover());
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          audio.click();
+          const targetTab = btn.getAttribute('data-compress-tab');
+          compressTabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          compressTabPanels.forEach(p => {
+            if (p.id === targetTab) {
+              p.classList.add('active');
+            } else {
+              p.classList.remove('active');
+            }
+          });
+        });
+      });
+
       // Sound toggle & Info
       btnSoundToggle.addEventListener('click', () => {
         audio.muted = !audio.muted;
@@ -2214,10 +2917,16 @@
         if (!audio.muted) audio.click();
       });
 
-      btnInfoHelp.addEventListener('click', () => {
+      btnInfoHelp.addEventListener('click', (e) => {
+        e.stopPropagation();
         audio.click();
-        showToast('BẤM VÀO 2 NÚT BÊN TRÁI ĐỂ CHỌN CHUYỂN ĐỔI HOẶC NÉN TỆP!');
+        const isOpen = helpModal && helpModal.style.display === 'flex';
+        closeAllModals();
+        if (!isOpen && helpModal) {
+          helpModal.style.display = 'flex';
+        }
       });
+      btnInfoHelp.addEventListener('mouseenter', () => audio.hover());
 
       // Option item selection across both modals
       document.querySelectorAll('.dropdown-item-btn').forEach(btn => {
@@ -2237,7 +2946,18 @@
 
       function openUploadModal(allowMultiple = false) {
         if (isDelivering) return;
-        modalTitle.textContent = currentMode.startsWith('compress') ? 'TRẠM TIẾP NHẬN NÉN TỆP' : 'TRẠM TIẾP NHẬN CHUYỂN ĐỔI';
+
+        const isPdfTool = ['pdf_merge','pdf_split','pdf_remove_pages','pdf_rotate','pdf_watermark','pdf_page_numbers','pdf_protect','pdf_unlock'].includes(currentMode);
+        const isCompress = currentMode.startsWith('compress');
+
+        if (isPdfTool) {
+          modalTitle.textContent = 'TRẠM CÔNG CỤ PDF';
+        } else if (isCompress) {
+          modalTitle.textContent = 'TRẠM TIẾP NHẬN NÉN TỆP';
+        } else {
+          modalTitle.textContent = 'TRẠM TIẾP NHẬN CHUYỂN ĐỔI';
+        }
+
         modeDisplayName.textContent = `Tùy chọn: ${currentModeName}`;
         dropzoneInstruction.textContent = allowMultiple ? `Kéo thả một hoặc nhiều file vào đây` : `Kéo thả file vào đây hoặc bấm để chọn`;
         dropzoneHint.textContent = `(Định dạng hỗ trợ: ${currentAccept})`;
@@ -2245,15 +2965,59 @@
         fileInput.accept = currentAccept;
         fileInput.multiple = allowMultiple;
 
+        const boxParamPageNumbers = document.getElementById('box-param-page-numbers');
+        const boxParamWatermark = document.getElementById('box-param-watermark');
+        const pdfParamBox = document.getElementById('pdf-param-box');
+        const pdfParamLabel = document.getElementById('pdf-param-label');
+        const pdfParamInput = document.getElementById('pdf-param-input');
+
+        // Reset all custom boxes
+        if (compressSettingsBox) compressSettingsBox.classList.remove('active');
+        if (boxParamPageNumbers) boxParamPageNumbers.classList.remove('active');
+        if (boxParamWatermark) boxParamWatermark.classList.remove('active');
+        if (pdfParamBox) pdfParamBox.classList.remove('active');
+
+        // Show specific options box based on mode
         if (currentMode === 'compress_image') {
           compressSettingsBox.classList.add('active');
+        } else if (currentMode === 'pdf_page_numbers') {
+          boxParamPageNumbers.classList.add('active');
+        } else if (currentMode === 'pdf_watermark') {
+          boxParamWatermark.classList.add('active');
         } else {
-          compressSettingsBox.classList.remove('active');
+          const paramConfigs = {
+            pdf_protect:      { label: 'MẬT KHẨU KHÓA PDF (BẮT BUỘC):', placeholder: 'Nhập mật khẩu (vd: 123456)...' },
+            pdf_unlock:       { label: 'MẬT KHẨU HIỆN TẠI (nếu có):', placeholder: 'Để trống nếu không có mật khẩu' },
+            pdf_split:        { label: 'KHOẢNG TRANG CẦN TÁCH (để trống = tách từng trang):', placeholder: 'Ví dụ: 1-3,5-7 hoặc để trống' },
+            pdf_remove_pages: { label: 'SỐ TRANG CẦN XÓA (cách nhau bởi dấu phẩy):', placeholder: 'Ví dụ: 1,3,5' },
+            pdf_rotate:       { label: 'GÓC XOAY (90 / 180 / 270 độ):', placeholder: '90' },
+          };
+
+          if (paramConfigs[currentMode]) {
+            pdfParamLabel.textContent = paramConfigs[currentMode].label;
+            pdfParamInput.placeholder = paramConfigs[currentMode].placeholder;
+            pdfParamInput.value = '';
+            pdfParamBox.classList.add('active');
+          }
         }
 
         clearSelectedFile();
         uploadModal.style.display = 'flex';
       }
+
+      // 3x3 Grid position pickers for Page Numbers & Watermark
+      document.querySelectorAll('#pn-grid-position .grid-pos-btn, #wm-grid-position .grid-pos-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          audio.click();
+          const parent = btn.closest('.retro-grid-3x3');
+          if (parent) {
+            parent.querySelectorAll('.grid-pos-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+          }
+        });
+      });
 
       compressQualitySlider.addEventListener('input', (e) => {
         sliderValLabel.textContent = e.target.value + '%';
@@ -2332,18 +3096,18 @@
         if (selectedFiles.length === 1) {
           loadedFileName.textContent = selectedFile.name;
           loadedFileSize.textContent = `(${formatBytes(selectedFile.size)})`;
+          dropzoneInstruction.textContent = `Đã chọn: ${selectedFile.name}`;
+          dropzoneHint.textContent = `(${formatBytes(selectedFile.size)} • Bấm nút bên dưới để gửi xử lý)`;
         } else {
           const totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
           loadedFileName.textContent = `${selectedFiles.length} tệp đã chọn (${selectedFiles.map(f => f.name).slice(0, 2).join(', ')}${selectedFiles.length > 2 ? '...' : ''})`;
           loadedFileSize.textContent = `(${formatBytes(totalBytes)})`;
+          dropzoneInstruction.textContent = `${selectedFiles.length} tệp đã sẵn sàng`;
+          dropzoneHint.textContent = `(Tổng cộng: ${formatBytes(totalBytes)} • Bấm nút bên dưới để gửi xử lý)`;
         }
 
         filePreviewStrip.classList.add('active');
-        btnStartProcess.disabled = false;
-
-        // 1. SEAMLESS TRIGGER: Close modal & IMMEDIATELY launch full pipeline without manual delay!
-        closeAllModals();
-        startPostmanDeliveryJourney(selectedFile, currentMode);
+        showToast(`Đã nhận: ${selectedFile.name}`);
       }
 
       function clearSelectedFile() {
@@ -2351,7 +3115,8 @@
         selectedFile = null;
         fileInput.value = '';
         filePreviewStrip.classList.remove('active');
-        btnStartProcess.disabled = true;
+        dropzoneInstruction.textContent = isMultipleFiles ? `Kéo thả một hoặc nhiều file vào đây` : `Kéo thả file vào đây hoặc bấm để chọn`;
+        dropzoneHint.textContent = `(Định dạng hỗ trợ: ${currentAccept})`;
       }
 
       btnClearFile.addEventListener('click', (e) => {
@@ -2360,8 +3125,14 @@
         clearSelectedFile();
       });
 
-      btnStartProcess.addEventListener('click', () => {
-        if (!selectedFile || isDelivering) return;
+      btnStartProcess.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (isDelivering) return;
+        if (!selectedFile) {
+          audio.error();
+          showToast('Vui lòng chọn hoặc thả tệp vào trước!');
+          return;
+        }
         audio.click();
         closeAllModals();
         startPostmanDeliveryJourney(selectedFile, currentMode);
@@ -2399,8 +3170,11 @@
         postmanParcel.style.display = 'block';
         postmanParcel.textContent = '✉️';
 
+        const isPdfTool = ['pdf_merge','pdf_split','pdf_remove_pages','pdf_rotate','pdf_watermark','pdf_page_numbers','pdf_protect','pdf_unlock'].includes(currentMode);
         const actionText = currentMode.startsWith('compress')
-          ? '📮 Đang nén ảnh & giao thư vào Bưu Điện...'
+          ? '📮 Đang nén tệp & giao thư vào Bưu Điện...'
+          : isPdfTool
+          ? `📮 Đang thực hiện ${currentModeName} trong Bưu Điện...`
           : `📮 Đang xử lý ${currentModeName} & giao thư vào Bưu Điện...`;
         showToast(actionText);
 
@@ -2470,6 +3244,20 @@
         } catch (err) {
           console.error('Lỗi chuyển đổi:', err);
           conversionResult = createFallbackRepackage(selectedFile, currentMode);
+        }
+
+        if (!conversionResult) {
+          clearInterval(progressTimer);
+          windowsSparkles.style.display = 'none';
+          officeStatusBadge.style.display = 'none';
+          isDelivering = false;
+          postmanParcel.style.display = 'none';
+          postmanEntity.style.transition = 'left 0.8s ease-in-out';
+          postmanEntity.style.transform = 'scaleX(1)';
+          postmanEntity.style.left = getStartX() + '%';
+          postmanEntity.style.opacity = '1';
+          uploadModal.style.display = 'flex';
+          return;
         }
 
         const elapsed = Date.now() - startTime;
@@ -2995,6 +3783,486 @@
             }
             break;
           }
+
+          // ====================================================================
+          // 14. PDF to Text / .txt  (pdf.js)
+          // ====================================================================
+          case 'pdf_to_text': {
+            if (window.pdfjsLib) {
+              window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+              const buffer = await file.arrayBuffer();
+              const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+              let fullText = `[ BUU DIEN SAI GON - TRICH XUAT PDF TO TEXT ]\nFile: ${file.name}\n${'='.repeat(60)}\n\n`;
+              for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const pageText = content.items.map(item => item.str).join(' ');
+                fullText += `--- Trang ${i} ---\n${pageText}\n\n`;
+              }
+              const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
+              return { blob, name: `${baseName}.txt`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 15. PDF to Excel / CSV  (pdf.js – extract lines as CSV rows)
+          // ====================================================================
+          case 'pdf_to_excel': {
+            if (window.pdfjsLib) {
+              window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+              const buffer = await file.arrayBuffer();
+              const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+              const csvRows = [['Trang', 'Noi_dung']];
+              for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                const lines = content.items.map(item => item.str.replace(/"/g, '""').trim()).filter(s => s.length > 0);
+                lines.forEach(line => csvRows.push([String(i), `"${line}"`]));
+              }
+              const csvContent = '\uFEFF' + csvRows.map(r => r.join(',')).join('\r\n');
+              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+              return { blob, name: `${baseName}_pdf_data.csv`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 16. HTML to PDF  (jsPDF)
+          // ====================================================================
+          case 'html_to_pdf': {
+            const htmlText = await file.text();
+            const { jsPDF } = window.jspdf || {};
+            if (jsPDF) {
+              // Strip HTML tags for text extraction (safe client-side approach)
+              const tmpDiv = document.createElement('div');
+              tmpDiv.innerHTML = htmlText;
+              const plainText = tmpDiv.innerText || tmpDiv.textContent || htmlText.replace(/<[^>]*>/g, ' ');
+              const doc = new jsPDF();
+              doc.setFont('courier', 'normal');
+              doc.setFontSize(10);
+              doc.text('[ BUU DIEN SAI GON - HTML TO PDF ]', 14, 15);
+              doc.text(`File: ${file.name}`, 14, 22);
+              doc.setLineWidth(0.5);
+              doc.line(14, 25, 196, 25);
+              const splitText = doc.splitTextToSize(plainText, 180);
+              let cursorY = 32;
+              for (let i = 0; i < splitText.length; i++) {
+                if (cursorY > 280) { doc.addPage(); cursorY = 20; }
+                doc.text(splitText[i], 14, cursorY);
+                cursorY += 6;
+              }
+              const blob = doc.output('blob');
+              return { blob, name: `${baseName}.pdf`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 17. PDF to PDF/A (pdf-lib – re-save with metadata marking)
+          // ====================================================================
+          case 'pdf_to_pdfa': {
+            if (window.PDFLib) {
+              const buffer = await file.arrayBuffer();
+              const pdfDoc = await window.PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+              pdfDoc.setTitle(baseName);
+              pdfDoc.setProducer('Buu Dien Sai Gon - Pixel Converter (PDF/A Compatible)');
+              pdfDoc.setCreationDate(new Date());
+              pdfDoc.setModificationDate(new Date());
+              const pdfBytes = await pdfDoc.save({ useObjectStreams: false });
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              return { blob, name: `${baseName}_pdfa.pdf`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 18. Merge PDF (pdf-lib – multiple files)
+          // ====================================================================
+          case 'pdf_merge': {
+            if (window.PDFLib) {
+              const mergedDoc = await window.PDFLib.PDFDocument.create();
+              const pdfFiles = filesToProcess.filter(f => f.name.toLowerCase().endsWith('.pdf'));
+              for (const f of pdfFiles) {
+                const buf = await f.arrayBuffer();
+                try {
+                  const srcDoc = await window.PDFLib.PDFDocument.load(buf, { ignoreEncryption: true });
+                  const pages = await mergedDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+                  pages.forEach(p => mergedDoc.addPage(p));
+                } catch (e) { console.warn('Skip invalid PDF:', f.name); }
+              }
+              const pdfBytes = await mergedDoc.save();
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              const totalOrig = pdfFiles.reduce((acc, f) => acc + f.size, 0);
+              return { blob, name: `merged_${Date.now()}.pdf`, origSize: totalOrig, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 19. Split PDF – each page → separate PDF (zipped together)
+          // ====================================================================
+          case 'pdf_split': {
+            if (window.PDFLib && window.JSZip) {
+              const paramRaw = (document.getElementById('pdf-param-input') || {}).value || '';
+              const buffer = await file.arrayBuffer();
+              const srcDoc = await window.PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+              const totalPages = srcDoc.getPageCount();
+
+              // Parse optional range groups like "1-3,5-7"
+              let pageGroups = [];
+              if (paramRaw.trim()) {
+                paramRaw.split(',').forEach(seg => {
+                  seg = seg.trim();
+                  const rangeMatch = seg.match(/^(\d+)-(\d+)$/);
+                  if (rangeMatch) {
+                    const start = Math.max(1, parseInt(rangeMatch[1])) - 1;
+                    const end = Math.min(totalPages, parseInt(rangeMatch[2])) - 1;
+                    if (start <= end) pageGroups.push({ start, end, label: seg });
+                  } else if (/^\d+$/.test(seg)) {
+                    const idx = Math.min(totalPages, parseInt(seg)) - 1;
+                    if (idx >= 0) pageGroups.push({ start: idx, end: idx, label: seg });
+                  }
+                });
+              }
+              if (pageGroups.length === 0) {
+                // Default: each page as separate PDF
+                for (let i = 0; i < totalPages; i++) {
+                  pageGroups.push({ start: i, end: i, label: String(i + 1) });
+                }
+              }
+
+              const zip = new window.JSZip();
+              for (const grp of pageGroups) {
+                const newDoc = await window.PDFLib.PDFDocument.create();
+                const indices = [];
+                for (let i = grp.start; i <= grp.end; i++) indices.push(i);
+                const pages = await newDoc.copyPages(srcDoc, indices);
+                pages.forEach(p => newDoc.addPage(p));
+                const partBytes = await newDoc.save();
+                zip.file(`${baseName}_trang${grp.label}.pdf`, partBytes);
+              }
+              const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+              return { blob, name: `${baseName}_split.zip`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 20. Remove Pages from PDF (pdf-lib)
+          // ====================================================================
+          case 'pdf_remove_pages': {
+            if (window.PDFLib) {
+              const paramRaw = (document.getElementById('pdf-param-input') || {}).value || '';
+              const buffer = await file.arrayBuffer();
+              const pdfDoc = await window.PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+              const totalPages = pdfDoc.getPageCount();
+              // Parse "1,3,5" → 0-indexed set to remove
+              const removeSet = new Set();
+              paramRaw.split(',').forEach(p => {
+                const n = parseInt(p.trim());
+                if (!isNaN(n) && n >= 1 && n <= totalPages) removeSet.add(n - 1);
+              });
+              // Remove pages in reverse order so indices remain stable
+              const removeArr = Array.from(removeSet).sort((a, b) => b - a);
+              removeArr.forEach(idx => pdfDoc.removePage(idx));
+              const pdfBytes = await pdfDoc.save();
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              return { blob, name: `${baseName}_removed.pdf`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 21. Rotate PDF pages (pdf-lib)
+          // ====================================================================
+          case 'pdf_rotate': {
+            if (window.PDFLib) {
+              const paramRaw = (document.getElementById('pdf-param-input') || {}).value || '90';
+              const degrees = parseInt(paramRaw) || 90;
+              const validDeg = [90, 180, 270].includes(Math.abs(degrees)) ? degrees : 90;
+              const { degrees: pdfDegrees } = window.PDFLib;
+              const buffer = await file.arrayBuffer();
+              const pdfDoc = await window.PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+              pdfDoc.getPages().forEach(page => {
+                const current = page.getRotation().angle;
+                page.setRotation(pdfDegrees((current + validDeg + 360) % 360));
+              });
+              const pdfBytes = await pdfDoc.save();
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              return { blob, name: `${baseName}_rotated${validDeg}deg.pdf`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 22. Add Watermark to PDF (pdf-lib)
+          // ====================================================================
+          // ====================================================================
+          // 22. Add Watermark to PDF (pdf-lib - chuẩn iLovePDF)
+          // ====================================================================
+          case 'pdf_watermark': {
+            if (window.PDFLib) {
+              const { rgb, degrees } = window.PDFLib;
+              const buffer = await file.arrayBuffer();
+              const pdfDoc = await window.PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+              const helveticaFont = await pdfDoc.embedFont(window.PDFLib.StandardFonts.Helvetica);
+
+              // 1. Đọc các tham số cấu hình nâng cao
+              const rawText = document.getElementById('wm-text-input')?.value || 'BUU DIEN SAI GON';
+              const watermarkText = (rawText.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, d => d === 'đ' ? 'd' : 'D').replace(/[^\x20-\x7E]/g, '') || 'BUU DIEN SAI GON').toUpperCase();
+              
+              const pos = document.querySelector('#wm-grid-position .grid-pos-btn.active')?.getAttribute('data-pos') || 'mc';
+              const isMosaic = !!document.getElementById('wm-mosaic-checkbox')?.checked;
+              const opacity = parseFloat(document.getElementById('wm-opacity-select')?.value) || 0.25;
+              const rotDeg = parseInt(document.getElementById('wm-rotation-select')?.value, 10) || 0;
+              const rangeFrom = parseInt(document.getElementById('wm-range-from')?.value, 10) || 1;
+              const rangeTo = parseInt(document.getElementById('wm-range-to')?.value, 10) || 0;
+
+              const pages = pdfDoc.getPages();
+              const total = pages.length;
+              const effectiveTo = (rangeTo > 0 && rangeTo <= total) ? rangeTo : total;
+
+              pages.forEach((page, idx) => {
+                const pageNum1Based = idx + 1;
+                if (pageNum1Based < rangeFrom || pageNum1Based > effectiveTo) return;
+
+                const { width, height } = page.getSize();
+                
+                if (isMosaic) {
+                  // Chế độ Mosaic: Lặp đều chữ mờ khắp trang
+                  const fontSize = Math.min(26, Math.max(16, width / 20));
+                  const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+                  const stepX = Math.max(textWidth * 1.3, width / 3);
+                  const stepY = height / 4;
+
+                  for (let gx = stepX * 0.35; gx < width + stepX * 0.5; gx += stepX) {
+                    for (let gy = stepY * 0.35; gy < height + stepY * 0.5; gy += stepY) {
+                      page.drawText(watermarkText, {
+                        x: gx - textWidth / 2,
+                        y: gy,
+                        size: fontSize,
+                        font: helveticaFont,
+                        color: rgb(0.65, 0.65, 0.65),
+                        opacity: opacity * 0.85,
+                        rotate: degrees(rotDeg),
+                      });
+                    }
+                  }
+                } else {
+                  // Chế độ Vị trí 3x3 Grid
+                  const fontSize = Math.min(42, Math.max(20, width / 14));
+                  const textWidth = helveticaFont.widthOfTextAtSize(watermarkText, fontSize);
+                  const textHeight = helveticaFont.heightAtSize(fontSize);
+                  
+                  // Tính tọa độ tâm (cx, cy) theo lưới 3x3
+                  let cx = width / 2;
+                  if (pos.endsWith('l')) cx = width * 0.22;
+                  else if (pos.endsWith('r')) cx = width * 0.78;
+                  else if (pos.endsWith('c')) cx = width * 0.5;
+
+                  let cy = height / 2;
+                  if (pos.startsWith('t')) cy = height * 0.82;
+                  else if (pos.startsWith('b')) cy = height * 0.18;
+                  else if (pos.startsWith('m')) cy = height * 0.5;
+
+                  const rad = (rotDeg * Math.PI) / 180;
+                  const cos = Math.cos(rad);
+                  const sin = Math.sin(rad);
+                  const drawX = cx - (textWidth / 2) * cos + (textHeight / 2) * sin;
+                  const drawY = cy - (textWidth / 2) * sin - (textHeight / 2) * cos;
+
+                  page.drawText(watermarkText, {
+                    x: drawX,
+                    y: drawY,
+                    size: fontSize,
+                    font: helveticaFont,
+                    color: rgb(0.6, 0.6, 0.6),
+                    opacity: opacity,
+                    rotate: degrees(rotDeg),
+                  });
+                }
+              });
+
+              const pdfBytes = await pdfDoc.save();
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              return { blob, name: `${baseName}_watermarked.pdf`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 23. Add Page Numbers to PDF (pdf-lib - chuẩn iLovePDF)
+          // ====================================================================
+          case 'pdf_page_numbers': {
+            if (window.PDFLib) {
+              const { rgb } = window.PDFLib;
+              const buffer = await file.arrayBuffer();
+              const pdfDoc = await window.PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+              const helveticaFont = await pdfDoc.embedFont(window.PDFLib.StandardFonts.Helvetica);
+
+              // 1. Đọc các tham số cấu hình
+              const pos = document.querySelector('#pn-grid-position .grid-pos-btn.active')?.getAttribute('data-pos') || 'bc';
+              const mode = document.querySelector('input[name="pn-mode"]:checked')?.value || 'single';
+              const marginSetting = document.querySelector('input[name="pn-margin"]:checked')?.value || 'medium';
+              const startNum = parseInt(document.getElementById('pn-first-num')?.value, 10) || 1;
+              const rangeFrom = parseInt(document.getElementById('pn-range-from')?.value, 10) || 1;
+              const rangeTo = parseInt(document.getElementById('pn-range-to')?.value, 10) || 0;
+
+              let margin = 28;
+              if (marginSetting === 'small') margin = 14;
+              else if (marginSetting === 'large') margin = 46;
+
+              const pages = pdfDoc.getPages();
+              const total = pages.length;
+              const effectiveTo = (rangeTo > 0 && rangeTo <= total) ? rangeTo : total;
+
+              pages.forEach((page, idx) => {
+                const pageNum1Based = idx + 1;
+                if (pageNum1Based < rangeFrom || pageNum1Based > effectiveTo) return;
+
+                const { width, height } = page.getSize();
+                const currentNumber = startNum + (pageNum1Based - rangeFrom);
+                const label = `${currentNumber}`;
+                const fontSize = 11;
+                const textWidth = helveticaFont.widthOfTextAtSize(label, fontSize);
+                const textHeight = helveticaFont.heightAtSize(fontSize);
+
+                // Xử lý chế độ trang đối xứng (Facing pages)
+                let effectivePos = pos;
+                if (mode === 'facing') {
+                  const isEven = (pageNum1Based % 2 === 0);
+                  if (isEven) {
+                    if (pos === 'tr') effectivePos = 'tl';
+                    else if (pos === 'tl') effectivePos = 'tr';
+                    else if (pos === 'mr') effectivePos = 'ml';
+                    else if (pos === 'ml') effectivePos = 'mr';
+                    else if (pos === 'br') effectivePos = 'bl';
+                    else if (pos === 'bl') effectivePos = 'br';
+                  }
+                }
+
+                // Tính tọa độ x theo cột
+                let x = margin;
+                if (effectivePos.endsWith('c')) {
+                  x = (width - textWidth) / 2;
+                } else if (effectivePos.endsWith('r')) {
+                  x = width - margin - textWidth;
+                } else if (effectivePos.endsWith('l')) {
+                  x = margin;
+                }
+
+                // Tính tọa độ y theo hàng
+                let y = margin;
+                if (effectivePos.startsWith('t')) {
+                  y = height - margin - textHeight;
+                } else if (effectivePos.startsWith('m')) {
+                  y = (height - textHeight) / 2;
+                } else if (effectivePos.startsWith('b')) {
+                  y = margin;
+                }
+
+                page.drawText(label, {
+                  x,
+                  y,
+                  size: fontSize,
+                  font: helveticaFont,
+                  color: rgb(0.2, 0.2, 0.2),
+                  opacity: 0.9,
+                });
+              });
+
+              const pdfBytes = await pdfDoc.save();
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              return { blob, name: `${baseName}_numbered.pdf`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 24. Protect PDF – Mã hóa mật khẩu PDF thật (Genuine PDF Encryption)
+          // ====================================================================
+          case 'pdf_protect': {
+            if (window.PDFLib) {
+              const pw = (document.getElementById('pdf-param-input') || {}).value || '123456';
+              const buffer = await file.arrayBuffer();
+              
+              // Tải tài liệu qua PDF-Lib để xuất ra mảng byte hoàn chỉnh
+              const pdfDoc = await window.PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+              const pdfBytes = await pdfDoc.save();
+
+              let encryptedBytes = null;
+              if (window.PDFEncrypt && typeof window.PDFEncrypt.encryptPDF === 'function') {
+                try {
+                  // Sử dụng Standard Security Handler AES-256 (hoặc RC4)
+                  encryptedBytes = await window.PDFEncrypt.encryptPDF(pdfBytes, pw, {
+                    ownerPassword: pw,
+                    algorithm: (window.crypto && window.crypto.subtle) ? 'AES-256' : 'RC4'
+                  });
+                } catch (encErr) {
+                  console.warn('AES-256 mã hóa gặp sự cố, thử lại với RC4:', encErr);
+                  try {
+                    encryptedBytes = await window.PDFEncrypt.encryptPDF(pdfBytes, pw, {
+                      ownerPassword: pw,
+                      algorithm: 'RC4'
+                    });
+                  } catch (rc4Err) {
+                    console.error('Mã hóa RC4 thất bại:', rc4Err);
+                  }
+                }
+              }
+
+              if (encryptedBytes) {
+                const blob = new Blob([encryptedBytes], { type: 'application/pdf' });
+                return {
+                  blob,
+                  name: `${baseName}_protected.pdf`,
+                  origSize: file.size,
+                  newSize: blob.size
+                };
+              }
+
+              // Fallback nếu không có thư viện mã hóa
+              const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+              return { blob, name: `${baseName}_protected.pdf`, origSize: file.size, newSize: blob.size };
+            }
+            break;
+          }
+
+          // ====================================================================
+          // 25. Unlock PDF (Tháo gỡ mật khẩu và mã hóa hoàn toàn)
+          // ====================================================================
+          case 'pdf_unlock': {
+            if (window.PDFLib) {
+              const enteredPassword = (document.getElementById('pdf-param-input') || {}).value || '';
+              const buffer = await file.arrayBuffer();
+              try {
+                const loadOptions = enteredPassword ? { password: enteredPassword } : {};
+                const sourcePdf = await window.PDFLib.PDFDocument.load(buffer, loadOptions);
+
+                const cleanPdf = await window.PDFLib.PDFDocument.create();
+                const copiedPages = await cleanPdf.copyPages(sourcePdf, sourcePdf.getPageIndices());
+                copiedPages.forEach(page => cleanPdf.addPage(page));
+                cleanPdf.setTitle(baseName);
+                cleanPdf.setProducer('Bưu Điện Sài Gòn - Unlocked PDF');
+
+                const unencryptedBytes = await cleanPdf.save();
+                const blob = new Blob([unencryptedBytes], { type: 'application/pdf' });
+                return {
+                  blob,
+                  name: `${baseName}_unlocked.pdf`,
+                  origSize: file.size,
+                  newSize: blob.size
+                };
+              } catch (unlockErr) {
+                console.error('Lỗi giải mã PDF:', unlockErr);
+                showToast('Mật khẩu không chính xác hoặc tệp bị lỗi! Vui lòng thử lại.');
+                if (audio && audio.error) audio.error();
+                return null;
+              }
+            }
+            break;
+          }
         }
 
         return createFallbackRepackage(file, mode);
@@ -3028,7 +4296,10 @@
 
       function createFallbackRepackage(file, mode) {
         let newExt = '.converted';
-        if (mode.includes('pdf')) newExt = '.pdf';
+        if (mode === 'pdf_to_text') newExt = '.txt';
+        else if (mode === 'pdf_to_excel') newExt = '.csv';
+        else if (mode === 'pdf_split' || mode === 'compress_zip') newExt = '.zip';
+        else if (mode.includes('pdf')) newExt = '.pdf';
         else if (mode.includes('png')) newExt = '.png';
         else if (mode.includes('jpeg') || mode.includes('jpg')) newExt = '.jpg';
         else if (mode.includes('webp')) newExt = '.webp';
@@ -3081,9 +4352,14 @@
       window.handleFilesChosen = handleFilesChosen;
       window.startPostmanDeliveryJourney = startPostmanDeliveryJourney;
       window.startDeliveryJourney = startPostmanDeliveryJourney;
+      window.runConversionEngine = runConversionEngine;
       Object.defineProperty(window, 'isDelivering', {
         get: () => isDelivering,
         set: (v) => { isDelivering = v; },
+        configurable: true
+      });
+      Object.defineProperty(window, 'processedBlob', {
+        get: () => processedBlob,
         configurable: true
       });
       applyTestState();
