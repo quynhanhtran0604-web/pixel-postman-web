@@ -18,6 +18,8 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
   <style>
     /* ==========================================================================
@@ -1412,6 +1414,57 @@
       background: var(--color-gold);
     }
 
+    /* QR Result Action Buttons */
+    .retro-qr-btn {
+      font-family: var(--pixel-font-vn);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 12px;
+      border: 3px solid #000;
+      box-shadow: 2px 2px 0 #000;
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.1s;
+      user-select: none;
+      text-align: center;
+      border-radius: 2px;
+    }
+
+    .retro-qr-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0 #000;
+    }
+
+    .retro-qr-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+
+    .btn-qr-copy {
+      background: #eae3cf;
+      color: #000;
+    }
+
+    .btn-qr-copy:hover {
+      background: var(--color-gold);
+      color: #000;
+    }
+
+    .btn-qr-open {
+      background: #1b4d3e;
+      color: #ffd700;
+    }
+
+    .btn-qr-open:hover {
+      background: #246b57;
+      color: #ffffff;
+    }
+
     /* ==========================================================================
        BOTTOM TOAST NOTIFICATION
        ========================================================================== */
@@ -1821,22 +1874,62 @@
         <div style="font-family: var(--pixel-font-vn); font-size: 16px; font-weight: 700; color: #000; line-height: 1.4;">
           "Bưu kiện của bạn đã xử lý xong!"
         </div>
-        <div class="bubble-details">
+        <div class="bubble-details" id="bubble-details-card">
           <div class="detail-row">
             <span>Tệp xuất:</span>
             <span id="bubble-file-name" class="detail-val">result.png</span>
           </div>
-          <div class="detail-row">
+          <div class="detail-row" id="bubble-orig-row">
             <span>Dung lượng gốc:</span>
             <span id="bubble-orig-size">1.2 MB</span>
           </div>
-          <div class="detail-row">
+          <div class="detail-row" id="bubble-new-row">
             <span>Dung lượng mới:</span>
             <span id="bubble-new-size" class="detail-val">450 KB</span>
           </div>
           <div class="detail-row" id="bubble-saved-row">
             <span>Tiết kiệm:</span>
             <span id="bubble-saved-pct" class="detail-val">-62.5%</span>
+          </div>
+        </div>
+
+        <!-- Tool A Result: QR Code Image Preview Card -->
+        <div id="bubble-qr-preview-box" style="display: none; text-align: center; margin: 2px 0;">
+          <div style="font-family: var(--pixel-font-vn); font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #1b4d3e;">
+            🔳 HÌNH ẢNH MÃ QR ĐÃ TẠO:
+          </div>
+          <div style="display: inline-block; padding: 10px; background: #ffffff; border: 3px solid #000; box-shadow: 3px 3px 0 #000;">
+            <img id="bubble-qr-img" src="" alt="Mã QR Code" style="display: block; max-width: 190px; max-height: 190px; width: 100%; height: auto; image-rendering: pixelated; margin: 0 auto;">
+          </div>
+        </div>
+
+        <!-- Tool B Result: Decoded Text / Link Box -->
+        <div id="bubble-qr-decoded-box" style="display: none; flex-direction: column; gap: 8px; margin: 2px 0;">
+          <div style="font-family: var(--pixel-font-vn); font-size: 13px; font-weight: 700; color: #1b4d3e;">
+            🔍 NỘI DUNG MÃ QR GIẢI MÃ ĐƯỢC:
+          </div>
+          <div id="bubble-qr-decoded-text" style="
+            background: #ffffff;
+            border: 3px solid #000;
+            padding: 8px 10px;
+            font-family: var(--pixel-font-vn);
+            font-size: 13px;
+            font-weight: 600;
+            color: #000000;
+            max-height: 105px;
+            overflow-y: auto;
+            word-break: break-all;
+            user-select: text;
+            box-shadow: 2px 2px 0 #000;
+            line-height: 1.4;
+          "></div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button id="btn-copy-qr-text" type="button" class="retro-qr-btn btn-qr-copy" style="flex: 1; min-width: 140px;">
+              📋 SAO CHÉP NỘI DUNG (COPY)
+            </button>
+            <a id="btn-open-qr-link" href="#" target="_blank" rel="noopener noreferrer" class="retro-qr-btn btn-qr-open" style="flex: 1; min-width: 140px; display: none;">
+              🔗 MỞ LIÊN KẾT (OPEN LINK)
+            </a>
           </div>
         </div>
         <button id="btn-download-result" class="download-action-btn" type="button">
@@ -1915,6 +2008,7 @@
         <button class="category-tab-btn active" data-tab="tab-documents" type="button">📁 Documents</button>
         <button class="category-tab-btn" data-tab="tab-images" type="button">🖼️ Images</button>
         <button class="category-tab-btn" data-tab="tab-data" type="button">📊 Data</button>
+        <button class="category-tab-btn" data-tab="tab-qrcode" type="button">📱 QR Code</button>
       </div>
 
       <!-- Category 1: Documents -->
@@ -2023,6 +2117,24 @@
           <div class="d-text">
             <div class="d-title">CSV to JSON</div>
             <div class="d-desc">Chuyển đổi bảng tính CSV sang cấu trúc mảng JSON chuẩn</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Category 4: QR Code -->
+      <div id="tab-qrcode" class="category-tab-panel">
+        <button class="dropdown-item-btn" data-mode="link_to_qr" data-name="Link / Văn bản sang QR Code" data-accept="" type="button">
+          <span class="d-icon">🔳</span>
+          <div class="d-text">
+            <div class="d-title">Link / Văn bản sang QR Code (Link to QR)</div>
+            <div class="d-desc">Tạo mã QR độ phân giải cao từ liên kết web hoặc nội dung văn bản</div>
+          </div>
+        </button>
+        <button class="dropdown-item-btn" data-mode="qr_to_link" data-name="Ảnh QR Code sang Link" data-accept=".png,.jpg,.jpeg,.webp" type="button">
+          <span class="d-icon">🔍</span>
+          <div class="d-text">
+            <div class="d-title">Ảnh QR Code sang Link (QR Image to Link)</div>
+            <div class="d-desc">Quét giải mã hình ảnh QR code để trích xuất link URL hoặc nội dung văn bản</div>
           </div>
         </button>
       </div>
@@ -2332,6 +2444,36 @@
             color: #000;
             user-select: text;
           " placeholder="" autocomplete="off">
+        </div>
+
+        <!-- 4. Cấu hình Tạo mã QR Code (Link/Text to QR Code) -->
+        <div id="box-param-qr-gen" class="compress-options-box">
+          <div style="font-family: var(--pixel-font-vn); font-size: 14px; font-weight: 700; color: #1b4d3e; border-bottom: 2px dashed #000; padding-bottom: 4px;">
+            📱 CẤU HÌNH TẠO MÃ QR CODE:
+          </div>
+
+          <div>
+            <span class="param-field-title">LIÊN KẾT HOẶC VĂN BẢN (URL / TEXT):</span>
+            <input type="text" id="qr-text-input" class="retro-input-sm" style="width: 100%;" placeholder="Nhập đường link https://... hoặc nội dung văn bản..." autocomplete="off">
+          </div>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 130px;">
+              <span class="param-field-title">KÍCH THƯỚC QR:</span>
+              <select id="qr-size-select" class="retro-select-sm" style="width: 100%;">
+                <option value="256" selected>256 x 256 px</option>
+                <option value="512">512 x 512 px (HD)</option>
+              </select>
+            </div>
+            <div style="flex: 1; min-width: 130px;">
+              <span class="param-field-title">MÀU SẮC MÃ QR:</span>
+              <select id="qr-color-select" class="retro-select-sm" style="width: 100%;">
+                <option value="#000000" selected>Đen (Black - Mặc định)</option>
+                <option value="#002b5c">Xanh Navy (Navy)</option>
+                <option value="#1b4d3e">Xanh Bưu Điện (Dark Green)</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <!-- Big Retro Dropzone Box (Native label for instant touch/click) -->
@@ -2760,6 +2902,18 @@
       const btnDownloadResult = document.getElementById('btn-download-result');
       const btnResetJourney = document.getElementById('btn-reset-journey');
 
+      // QR Code Tool Elements
+      const boxParamQrGen = document.getElementById('box-param-qr-gen');
+      const qrTextInput = document.getElementById('qr-text-input');
+      const qrSizeSelect = document.getElementById('qr-size-select');
+      const qrColorSelect = document.getElementById('qr-color-select');
+      const bubbleQrPreviewBox = document.getElementById('bubble-qr-preview-box');
+      const bubbleQrImg = document.getElementById('bubble-qr-img');
+      const bubbleQrDecodedBox = document.getElementById('bubble-qr-decoded-box');
+      const bubbleQrDecodedText = document.getElementById('bubble-qr-decoded-text');
+      const btnCopyQrText = document.getElementById('btn-copy-qr-text');
+      const btnOpenQrLink = document.getElementById('btn-open-qr-link');
+
       let currentMode = 'pdf_to_png';
       let currentModeName = 'PDF to PNG / JPG';
       let currentAccept = '.pdf';
@@ -2866,8 +3020,8 @@
       btnMainCompress.addEventListener('mouseenter', () => audio.hover());
 
       // Category Tabs inside Convert Modal
-      const categoryTabBtns = document.querySelectorAll('.category-tab-btn');
-      const categoryPanels = document.querySelectorAll('.category-tab-panel');
+      const categoryTabBtns = document.querySelectorAll('#convert-modal .category-tab-btn');
+      const categoryPanels = document.querySelectorAll('#convert-modal .category-tab-panel');
 
       categoryTabBtns.forEach(btn => {
         btn.addEventListener('mouseenter', () => audio.hover());
@@ -2875,6 +3029,7 @@
           e.stopPropagation();
           audio.click();
           const targetTab = btn.getAttribute('data-tab');
+          if (!targetTab) return;
           categoryTabBtns.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           categoryPanels.forEach(p => {
@@ -2950,7 +3105,11 @@
         const isPdfTool = ['pdf_merge','pdf_split','pdf_remove_pages','pdf_rotate','pdf_watermark','pdf_page_numbers','pdf_protect','pdf_unlock'].includes(currentMode);
         const isCompress = currentMode.startsWith('compress');
 
-        if (isPdfTool) {
+        if (currentMode === 'link_to_qr') {
+          modalTitle.textContent = 'TRẠM TẠO MÃ QR CODE';
+        } else if (currentMode === 'qr_to_link') {
+          modalTitle.textContent = 'TRẠM QUÉT MÃ QR CODE';
+        } else if (isPdfTool) {
           modalTitle.textContent = 'TRẠM CÔNG CỤ PDF';
         } else if (isCompress) {
           modalTitle.textContent = 'TRẠM TIẾP NHẬN NÉN TỆP';
@@ -2976,33 +3135,43 @@
         if (boxParamPageNumbers) boxParamPageNumbers.classList.remove('active');
         if (boxParamWatermark) boxParamWatermark.classList.remove('active');
         if (pdfParamBox) pdfParamBox.classList.remove('active');
+        if (boxParamQrGen) boxParamQrGen.classList.remove('active');
 
         // Show specific options box based on mode
-        if (currentMode === 'compress_image') {
-          compressSettingsBox.classList.add('active');
-        } else if (currentMode === 'pdf_page_numbers') {
-          boxParamPageNumbers.classList.add('active');
-        } else if (currentMode === 'pdf_watermark') {
-          boxParamWatermark.classList.add('active');
+        if (currentMode === 'link_to_qr') {
+          dropzone.style.display = 'none';
+          if (boxParamQrGen) boxParamQrGen.classList.add('active');
         } else {
-          const paramConfigs = {
-            pdf_protect:      { label: 'MẬT KHẨU KHÓA PDF (BẮT BUỘC):', placeholder: 'Nhập mật khẩu (vd: 123456)...' },
-            pdf_unlock:       { label: 'MẬT KHẨU HIỆN TẠI (nếu có):', placeholder: 'Để trống nếu không có mật khẩu' },
-            pdf_split:        { label: 'KHOẢNG TRANG CẦN TÁCH (để trống = tách từng trang):', placeholder: 'Ví dụ: 1-3,5-7 hoặc để trống' },
-            pdf_remove_pages: { label: 'SỐ TRANG CẦN XÓA (cách nhau bởi dấu phẩy):', placeholder: 'Ví dụ: 1,3,5' },
-            pdf_rotate:       { label: 'GÓC XOAY (90 / 180 / 270 độ):', placeholder: '90' },
-          };
+          dropzone.style.display = '';
+          if (currentMode === 'compress_image') {
+            compressSettingsBox.classList.add('active');
+          } else if (currentMode === 'pdf_page_numbers') {
+            boxParamPageNumbers.classList.add('active');
+          } else if (currentMode === 'pdf_watermark') {
+            boxParamWatermark.classList.add('active');
+          } else {
+            const paramConfigs = {
+              pdf_protect:      { label: 'MẬT KHẨU KHÓA PDF (BẮT BUỘC):', placeholder: 'Nhập mật khẩu (vd: 123456)...' },
+              pdf_unlock:       { label: 'MẬT KHẨU HIỆN TẠI (nếu có):', placeholder: 'Để trống nếu không có mật khẩu' },
+              pdf_split:        { label: 'KHOẢNG TRANG CẦN TÁCH (để trống = tách từng trang):', placeholder: 'Ví dụ: 1-3,5-7 hoặc để trống' },
+              pdf_remove_pages: { label: 'SỐ TRANG CẦN XÓA (cách nhau bởi dấu phẩy):', placeholder: 'Ví dụ: 1,3,5' },
+              pdf_rotate:       { label: 'GÓC XOAY (90 / 180 / 270 độ):', placeholder: '90' },
+            };
 
-          if (paramConfigs[currentMode]) {
-            pdfParamLabel.textContent = paramConfigs[currentMode].label;
-            pdfParamInput.placeholder = paramConfigs[currentMode].placeholder;
-            pdfParamInput.value = '';
-            pdfParamBox.classList.add('active');
+            if (paramConfigs[currentMode]) {
+              pdfParamLabel.textContent = paramConfigs[currentMode].label;
+              pdfParamInput.placeholder = paramConfigs[currentMode].placeholder;
+              pdfParamInput.value = '';
+              pdfParamBox.classList.add('active');
+            }
           }
         }
 
         clearSelectedFile();
         uploadModal.style.display = 'flex';
+        if (currentMode === 'link_to_qr' && qrTextInput) {
+          setTimeout(() => qrTextInput.focus(), 60);
+        }
       }
 
       // 3x3 Grid position pickers for Page Numbers & Watermark
@@ -3128,6 +3297,22 @@
       btnStartProcess.addEventListener('click', (e) => {
         e.preventDefault();
         if (isDelivering) return;
+
+        if (currentMode === 'link_to_qr') {
+          const qrText = qrTextInput ? qrTextInput.value.trim() : '';
+          if (!qrText) {
+            audio.error();
+            showToast('Vui lòng nhập đường link hoặc nội dung cần tạo mã QR!');
+            if (qrTextInput) qrTextInput.focus();
+            return;
+          }
+          selectedFile = new File([new TextEncoder().encode(qrText)], 'qrcode_payload.txt', { type: 'text/plain' });
+          audio.click();
+          closeAllModals();
+          startPostmanDeliveryJourney(selectedFile, currentMode);
+          return;
+        }
+
         if (!selectedFile) {
           audio.error();
           showToast('Vui lòng chọn hoặc thả tệp vào trước!');
@@ -3344,8 +3529,93 @@
           bubbleSavedRow.style.display = 'none';
         }
 
+        // Handle Tool A: QR Code Image Preview
+        if (result.qrDataUrl) {
+          if (bubbleQrPreviewBox && bubbleQrImg) {
+            bubbleQrImg.src = result.qrDataUrl;
+            bubbleQrPreviewBox.style.display = 'block';
+          }
+        } else {
+          if (bubbleQrPreviewBox) bubbleQrPreviewBox.style.display = 'none';
+        }
+
+        // Handle Tool B: Decoded Text / Link Box
+        if (result.qrDecodedText) {
+          if (bubbleQrDecodedBox && bubbleQrDecodedText) {
+            bubbleQrDecodedText.textContent = result.qrDecodedText;
+            bubbleQrDecodedBox.style.display = 'flex';
+
+            const trimmed = result.qrDecodedText.trim();
+            if (/^https?:\/\//i.test(trimmed)) {
+              btnOpenQrLink.href = trimmed;
+              btnOpenQrLink.style.display = 'inline-flex';
+            } else {
+              btnOpenQrLink.style.display = 'none';
+            }
+          }
+        } else {
+          if (bubbleQrDecodedBox) bubbleQrDecodedBox.style.display = 'none';
+        }
+
         deliveryBubble.style.display = 'flex';
         showToast('🎉 BƯU KIỆN ĐÃ ĐẾN! BẤM TẢI VỀ NGAY!');
+      }
+
+      // QR Code Copy Button
+      if (btnCopyQrText) {
+        btnCopyQrText.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const textToCopy = bubbleQrDecodedText ? bubbleQrDecodedText.textContent : '';
+          if (!textToCopy) return;
+
+          let copied = false;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+              await navigator.clipboard.writeText(textToCopy);
+              copied = true;
+            } catch (clipErr) {
+              // fallback below
+            }
+          }
+
+          if (!copied) {
+            try {
+              const ta = document.createElement('textarea');
+              ta.value = textToCopy;
+              ta.setAttribute('readonly', '');
+              ta.style.position = 'absolute';
+              ta.style.left = '-9999px';
+              document.body.appendChild(ta);
+              ta.select();
+              ta.setSelectionRange(0, 99999);
+              copied = document.execCommand('copy');
+              document.body.removeChild(ta);
+            } catch (fallbackErr) {
+              copied = false;
+            }
+          }
+
+          if (copied) {
+            if (audio) audio.click();
+            showToast('📋 ĐÃ SAO CHÉP NỘI DUNG VÀO BỘ NHỚ TẠM!');
+          } else {
+            if (bubbleQrDecodedText) {
+              const range = document.createRange();
+              range.selectNodeContents(bubbleQrDecodedText);
+              const sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
+            showToast('📋 Vui lòng nhấn Ctrl+C để sao chép!');
+          }
+        });
+      }
+
+      if (btnOpenQrLink) {
+        btnOpenQrLink.addEventListener('click', () => {
+          if (audio) audio.click();
+        });
       }
 
       // Download Action
@@ -3373,6 +3643,15 @@
 
       function resetToIdleState() {
         deliveryBubble.style.display = 'none';
+        if (bubbleQrPreviewBox) {
+          bubbleQrPreviewBox.style.display = 'none';
+          if (bubbleQrImg) bubbleQrImg.src = '';
+        }
+        if (bubbleQrDecodedBox) {
+          bubbleQrDecodedBox.style.display = 'none';
+          if (bubbleQrDecodedText) bubbleQrDecodedText.textContent = '';
+          if (btnOpenQrLink) btnOpenQrLink.style.display = 'none';
+        }
         postmanParcel.style.display = 'none';
         postmanEntity.style.transition = 'left 1s ease-in-out';
         postmanEntity.style.transform = 'scaleX(1)';
@@ -4263,9 +4542,107 @@
             }
             break;
           }
+
+          // ====================================================================
+          // 26. Link / Văn bản sang QR Code (Link to QR Code)
+          // ====================================================================
+          case 'link_to_qr': {
+            const qrText = (qrTextInput && qrTextInput.value.trim()) ? qrTextInput.value.trim() : 'https://postman.pixel';
+            const qrSize = parseInt(qrSizeSelect ? qrSizeSelect.value : '256', 10) || 256;
+            const qrColor = (qrColorSelect && qrColorSelect.value) ? qrColorSelect.value : '#000000';
+
+            const canvas = generateQRCodeCanvas(qrText, qrSize, qrColor);
+            if (!canvas) throw new Error('Không thể tạo Canvas mã QR');
+
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            const qrDataUrl = canvas.toDataURL('image/png');
+            const origBytes = new TextEncoder().encode(qrText).length;
+
+            return {
+              blob,
+              name: 'qrcode.png',
+              origSize: origBytes,
+              newSize: blob.size,
+              qrDataUrl
+            };
+          }
+
+          // ====================================================================
+          // 27. Ảnh QR Code sang Link (QR Code Image to Link / Decoded Text)
+          // ====================================================================
+          case 'qr_to_link': {
+            const img = await loadImageFromFile(file);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let code = null;
+            if (window.jsQR) {
+              code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: 'dontInvert'
+              }) || jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: 'onlyInvert'
+              }) || jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: 'attemptBoth'
+              });
+            }
+
+            if (!code || !code.data) {
+              showToast('Không tìm thấy mã QR hợp lệ trong ảnh này!');
+              if (audio && audio.error) audio.error();
+              return null;
+            }
+
+            const decodedStr = code.data;
+            const textBlob = new Blob([decodedStr], { type: 'text/plain;charset=utf-8' });
+
+            return {
+              blob: textBlob,
+              name: `${baseName}_decoded.txt`,
+              origSize: file.size,
+              newSize: textBlob.size,
+              qrDecodedText: decodedStr
+            };
+          }
         }
 
         return createFallbackRepackage(file, mode);
+      }
+
+      function generateQRCodeCanvas(text, size, color) {
+        if (!window.QRCode) throw new Error('Thư viện QRCode.js chưa sẵn sàng!');
+        const container = document.createElement('div');
+        const qr = new QRCode(container, {
+          text: 'init',
+          width: size,
+          height: size,
+          colorDark: color || '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        const itemProto = Object.getPrototypeOf(qr._oQRCode.dataList[0]);
+        const modelProto = Object.getPrototypeOf(qr._oQRCode);
+        const bytes = Array.from(new TextEncoder().encode(text));
+        const customItem = Object.create(itemProto);
+        customItem.mode = 4; // 8-bit byte mode
+        customItem.parsedData = bytes;
+        for (let t = 1; t <= 40; t++) {
+          try {
+            const m = Object.create(modelProto);
+            m.typeNumber = t;
+            m.errorCorrectLevel = QRCode.CorrectLevel.M;
+            m.modules = null;
+            m.moduleCount = 0;
+            m.dataList = [customItem];
+            m.make();
+            qr._oDrawing.draw(m);
+            break;
+          } catch (e) {}
+        }
+        return container.querySelector('canvas');
       }
 
       function loadImageFromFile(file) {
@@ -4296,7 +4673,9 @@
 
       function createFallbackRepackage(file, mode) {
         let newExt = '.converted';
-        if (mode === 'pdf_to_text') newExt = '.txt';
+        if (mode === 'link_to_qr') newExt = '.png';
+        else if (mode === 'qr_to_link') newExt = '.txt';
+        else if (mode === 'pdf_to_text') newExt = '.txt';
         else if (mode === 'pdf_to_excel') newExt = '.csv';
         else if (mode === 'pdf_split' || mode === 'compress_zip') newExt = '.zip';
         else if (mode.includes('pdf')) newExt = '.pdf';
